@@ -1,17 +1,17 @@
 {
-    "name": "waffle-commons/{COMPONENT_NAME}",
-    "version": "0.1.0-alpha1.0",
-    "description": "Short description of {COMPONENT_NAME}.",
+    "name": "waffle-commons/routing",
+    "version": "0.1.0-alpha1",
+    "description": "Routing component for Waffle framework.",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Waffle\\Commons\\{COMPONENT_NAME}": "src/"
+            "Waffle\\Commons\\Routing\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "WaffleTests\\Commons\\{COMPONENT_NAME}": "tests/src/"
+            "WaffleTests\\Commons\\Routing\\": "tests/src/"
         }
     },
     "authors": [
