@@ -1,0 +1,17 @@
+# Misc
+/**/.DS_Store
+
+# IDEs
+/.idea
+/.vscode
+/.idx
+
+# Vendors
+/vendor
+
+# Cache
+/var
+
+# Mago
+/mago-analyzer-baseline.toml
+/mago-linter-baseline.toml
