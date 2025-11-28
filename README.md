@@ -18,3 +18,22 @@ This component is currently in active development. It will provide a high-perfor
 ```bash
 composer require waffle-commons/routing
 ```
+
+Testing
+-------
+
+To run the tests, use the following command:
+
+```bash
+composer tests
+```
+
+Contributing
+------------
+
+Contributions are welcome! Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+License
+-------
+
+This project is licensed under the MIT License. See the [LICENSE.md](./LICENSE.md) file for details.
