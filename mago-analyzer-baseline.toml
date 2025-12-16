@@ -1,0 +1,259 @@
+variant = "loose"
+
+[[issues]]
+file = "src/RouteDiscoverer.php"
+code = "unused-parameter"
+message = "Parameter `$container` is never used."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "incompatible-property-hook-parameter-type"
+message = '''Set hook parameter type `array<array-key, array{'arguments': array<string, mixed>, 'classname': class-string, 'method': string, 'name': truthy-string, 'path': string}>` for property `Waffle\Commons\Routing\Router::$routes` is incompatible with property type `array<array-key, mixed>`.'''
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "incompatible-property-hook-parameter-type"
+message = 'Set hook parameter type `array<array-key, string>|false` for property `Waffle\Commons\Routing\Router::$files` is incompatible with property type `array<array-key, mixed>|false`.'
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "invalid-property-read"
+message = 'Cannot read from write-only property `Waffle\Commons\Routing\Router::$routes` - property only has a set hook.'
+count = 2
+
+[[issues]]
+file = "src/Router.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Routing\Router::boot`.'
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Routing\Router::getRoutes`.'
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Routing\Router::matchRequest`.'
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "mixed-argument"
+message = '''Invalid argument type for argument #2 of `Waffle\Commons\Routing\Router::match`: expected `array{'arguments': array<string, mixed>, 'classname': class-string, 'method': string, 'name': truthy-string, 'path': string}`, but found `mixed`.'''
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `waffle\commons\routing\router::matchrequest`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "mixed-property-type-coercion"
+message = "A value with a less specific type `mixed` is being assigned to property `$$cacheFilePath` (string)."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/Controller/ComplexParametersController.php"
+code = "unused-parameter"
+message = "Parameter `$param` is never used."
+count = 2
+
+[[issues]]
+file = "tests/src/Helper/Controller/TempController.php"
+code = "unused-parameter"
+message = "Parameter `$id` is never used."
+count = 2
+
+[[issues]]
+file = "tests/src/Helper/Controller/TempController.php"
+code = "unused-parameter"
+message = "Parameter `$slug` is never used."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "incompatible-parameter-name"
+message = 'Parameter #2 of `WaffleTests\Commons\Routing\Helper\MockContainer::set()` is named `$service` but parent `Waffle\Commons\Contracts\Container\ContainerInterface::set()` names it `$concrete`'
+count = 2
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `waffletests\commons\routing\helper\mockcontainer::instantiate`: expected `object`, but found `null|object`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Routing\Helper\MockContainer::get`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Routing\Helper\MockContainer::has`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Routing\Helper\MockContainer::set`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "nullable-return-statement"
+message = 'Function `waffletests\commons\routing\helper\mockcontainer::instantiate` is declared to return `object` but possibly returns a nullable value (inferred as `null|object`).'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `reflectionclass::__construct`: expected `('T.reflectionclass extends object)|class-string<'T.reflectionclass extends object>`, but possibly received `string`."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unevaluated-code"
+message = "Unreachable code detected."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/Service/NonReadOnlyService.php"
+code = "non-existent-class-like"
+message = 'Class `WaffleTests\Helper\Service\NonReadOnlyService` cannot extend unknown type `AbstractService`'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `Waffle\Commons\Routing\ControllerFinder::find` is possibly `null`, but parameter type `false|string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "possibly-null-operand"
+message = "Possibly null left operand used in string concatenation (type `null|string`)."
+count = 7
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "possibly-null-argument"
+message = "Argument #1 of function `is_dir` is possibly `null`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "possibly-null-argument"
+message = "Argument #1 of function `rmdir` is possibly `null`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `waffle\commons\routing\routediscoverer::__construct` is possibly `null`, but parameter type `false|string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "invalid-property-read"
+message = 'Cannot read from write-only property `Waffle\Commons\Routing\Router::$routes` - property only has a set hook.'
+count = 3
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "no-value"
+message = 'Argument #1 passed to method `phpunit\framework\assert::assertempty` has type `never`, meaning it cannot produce a value.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "no-value"
+message = 'Argument #1 passed to method `phpunit\framework\assert::assertnotempty` has type `never`, meaning it cannot produce a value.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "no-value"
+message = 'Argument #2 passed to method `phpunit\framework\assert::assertcount` has type `never`, meaning it cannot produce a value.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "no-value"
+message = 'Argument #2 passed to method `phpunit\framework\assert::assertsame` has type `never`, meaning it cannot produce a value.'
+count = 1
