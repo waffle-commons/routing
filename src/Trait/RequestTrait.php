@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Routing\Trait;
 
-use Waffle\Commons\Contracts\Constant\Constant;
-
 trait RequestTrait
 {
     /**

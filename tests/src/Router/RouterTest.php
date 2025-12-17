@@ -57,13 +57,15 @@ final class RouterTest extends TestCase
 
         $foundRoute = false;
         foreach ($this->router->routes as $route) {
-            if ('user_users_list' === $route['name']) {
-                $foundRoute = true;
-                static::assertSame(TempController::class, $route['classname']);
-                static::assertSame('/users', $route['path']);
-                static::assertSame('list', $route['method']);
-                break;
+            if ('user_users_list' !== $route['name']) {
+                continue;
             }
+
+            $foundRoute = true;
+            static::assertSame(TempController::class, $route['classname']);
+            static::assertSame('/users', $route['path']);
+            static::assertSame('list', $route['method']);
+            break;
         }
         static::assertTrue($foundRoute);
     }

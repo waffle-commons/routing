@@ -14,6 +14,7 @@ class MockContainer implements ContainerInterface, PsrContainerInterface
     private array $services = [];
     private array $building = [];
 
+    #[\Override]
     public function get(string $id): mixed
     {
         if (!$this->has($id)) {
@@ -105,11 +106,13 @@ class MockContainer implements ContainerInterface, PsrContainerInterface
         return $reflector->newInstanceArgs($dependencies);
     }
 
+    #[\Override]
     public function has(string $id): bool
     {
         return isset($this->services[$id]) || class_exists($id);
     }
 
+    #[\Override]
     public function set(string $id, mixed $service): void
     {
         $this->services[$id] = $service;

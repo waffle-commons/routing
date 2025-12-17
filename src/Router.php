@@ -53,6 +53,7 @@ final class Router implements RouterInterface
         $this->discoverer = new RouteDiscoverer(directory: $directory);
     }
 
+    #[\Override]
     public function boot(ContainerInterface $container): self
     {
         $cachedRoutes = $this->cache->load();
@@ -90,6 +91,7 @@ final class Router implements RouterInterface
      *        name: non-falsy-string
      *   }|null Returns the route array if matched, null otherwise.
      */
+    #[\Override]
     public function matchRequest(ServerRequestInterface $request): null|array
     {
         foreach ($this->routes as $route) {
@@ -154,6 +156,7 @@ final class Router implements RouterInterface
      *       name: non-falsy-string
      *  }>
      */
+    #[\Override]
     public function getRoutes(): array
     {
         return $this->routes;
