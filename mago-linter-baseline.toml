@@ -1,0 +1,211 @@
+variant = "loose"
+
+[[issues]]
+file = "src/Cache/RouteCache.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/ControllerFinder.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/ControllerFinder.php"
+code = "literal-named-argument"
+message = "Literal argument `'.'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.7000000000000002)."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "literal-named-argument"
+message = "Literal argument `'/'` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "literal-named-argument"
+message = "Literal argument `'{'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "literal-named-argument"
+message = "Literal argument `'{}'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "literal-named-argument"
+message = "Literal argument `'}'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "no-redundant-method-override"
+message = "Redundant method override."
+count = 2
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "literal-named-argument"
+message = """Literal argument `'<?php return ["dummy_route"];'` should be passed as a named argument for clarity."""
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 2
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "halstead"
+message = "Method has a high halstead difficulty"
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = 'Literal argument `"<?php\n\nnamespace FinderTest;\n\nfinal class SomeService {}\n"` should be passed as a named argument for clarity.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = 'Literal argument `"<?php\n\nnamespace FinderTest;\n\nfinal class TempControllerA {}\n"` should be passed as a named argument for clarity.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = 'Literal argument `"<?php\n\nnamespace FinderTest\\SubDir;\n\nfinal class TempControllerB {}\n"` should be passed as a named argument for clarity.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'<?php // test file'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'Some notes.'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'TEST=true'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = "Literal argument `0777` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'arguments'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'name'` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'path'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
