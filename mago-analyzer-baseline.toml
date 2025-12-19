@@ -1,9 +1,21 @@
 variant = "loose"
 
 [[issues]]
-file = "src/RouteDiscoverer.php"
-code = "unused-parameter"
-message = "Parameter `$container` is never used."
+file = "src/RouteParser.php"
+code = "non-existent-method"
+message = "Method `getname` does not exist on type `ReflectionIntersectionType`."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "non-existent-method"
+message = "Method `getname` does not exist on type `ReflectionUnionType`."
+count = 1
+
+[[issues]]
+file = "src/RouteParser.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `ReflectionException` in `Waffle\Commons\Routing\RouteParser::parse`.'
 count = 1
 
 [[issues]]
@@ -23,24 +35,6 @@ file = "src/Router.php"
 code = "invalid-property-read"
 message = 'Cannot read from write-only property `Waffle\Commons\Routing\Router::$routes` - property only has a set hook.'
 count = 2
-
-[[issues]]
-file = "src/Router.php"
-code = "missing-override-attribute"
-message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Routing\Router::boot`.'
-count = 1
-
-[[issues]]
-file = "src/Router.php"
-code = "missing-override-attribute"
-message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Routing\Router::getRoutes`.'
-count = 1
-
-[[issues]]
-file = "src/Router.php"
-code = "missing-override-attribute"
-message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Routing\Router::matchRequest`.'
-count = 1
 
 [[issues]]
 file = "src/Router.php"
@@ -73,6 +67,30 @@ message = "Cannot return value with type 'never' from this function."
 count = 1
 
 [[issues]]
+file = "tests/src/Attribute/ArgumentTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Attribute\ArgumentTest::testConstructorAssignsPropertiesCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Attribute/ArgumentTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Attribute\ArgumentTest::testConstructorWithDefaultRequiredValue`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Attribute/RouteTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Attribute\RouteTest::testConstructorWithAllParameters`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Attribute/RouteTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Attribute\RouteTest::testConstructorWithDefaultParameters`.'
+count = 1
+
+[[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"
 code = "mixed-operand"
 message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
@@ -85,21 +103,51 @@ message = "A value with a less specific type `mixed` is being assigned to proper
 count = 1
 
 [[issues]]
-file = "tests/src/Helper/Controller/ComplexParametersController.php"
-code = "unused-parameter"
-message = "Parameter `$param` is never used."
-count = 2
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testIsProductionHelper`.'
+count = 1
 
 [[issues]]
-file = "tests/src/Helper/Controller/TempController.php"
-code = "unused-parameter"
-message = "Parameter `$id` is never used."
-count = 2
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testLoadReturnsNullWhenInProductionButCacheFileDoesNotExist`.'
+count = 1
 
 [[issues]]
-file = "tests/src/Helper/Controller/TempController.php"
-code = "unused-parameter"
-message = "Parameter `$slug` is never used."
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testLoadReturnsNullWhenNotInProduction`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testLoadReturnsRoutesWhenInProductionAndCacheExists`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testSaveDoesNothingWhenNotInProduction`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testSaveWritesCacheFileWhenInProduction`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `ReflectionException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::setUp`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `ReflectionException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testIsProductionHelper`.'
 count = 1
 
 [[issues]]
@@ -112,24 +160,6 @@ count = 2
 file = "tests/src/Helper/MockContainer.php"
 code = "invalid-return-statement"
 message = 'Invalid return type for function `waffletests\commons\routing\helper\mockcontainer::instantiate`: expected `object`, but found `null|object`.'
-count = 1
-
-[[issues]]
-file = "tests/src/Helper/MockContainer.php"
-code = "missing-override-attribute"
-message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Routing\Helper\MockContainer::get`.'
-count = 1
-
-[[issues]]
-file = "tests/src/Helper/MockContainer.php"
-code = "missing-override-attribute"
-message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Routing\Helper\MockContainer::has`.'
-count = 1
-
-[[issues]]
-file = "tests/src/Helper/MockContainer.php"
-code = "missing-override-attribute"
-message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Routing\Helper\MockContainer::set`.'
 count = 1
 
 [[issues]]
@@ -163,6 +193,42 @@ message = "Unreachable code detected."
 count = 1
 
 [[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `Psr\Container\ContainerExceptionInterface` in `WaffleTests\Commons\Routing\Helper\MockContainer::instantiate`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `Psr\Container\NotFoundExceptionInterface` in `WaffleTests\Commons\Routing\Helper\MockContainer::instantiate`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `ReflectionException` in `WaffleTests\Commons\Routing\Helper\MockContainer::instantiate`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `class@anonymous:18017892162872485466-1050:1168` in `WaffleTests\Commons\Routing\Helper\MockContainer::resolve`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `class@anonymous:18017892162872485466-2180:2302` in `WaffleTests\Commons\Routing\Helper\MockContainer::instantiate`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `class@anonymous:18017892162872485466-3078:3227` in `WaffleTests\Commons\Routing\Helper\MockContainer::instantiate`.'
+count = 1
+
+[[issues]]
 file = "tests/src/Helper/Service/NonReadOnlyService.php"
 code = "non-existent-class-like"
 message = 'Class `WaffleTests\Helper\Service\NonReadOnlyService` cannot extend unknown type `AbstractService`'
@@ -187,6 +253,90 @@ message = "Possibly null left operand used in string concatenation (type `null|s
 count = 7
 
 [[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\AssertionFailedError` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::setUp`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testFindDiscoversControllersCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanIgnoresDotFiles`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanReturnsEmptyArrayForEmptyDirectory`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testFindDiscoversControllersCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testFindReturnsFalseForFilePath`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testFindReturnsFalseForNonExistentDirectory`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanIgnoresDotFiles`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanReturnsEmptyArrayForEmptyDirectory`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testFindDiscoversControllersCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanIgnoresDotFiles`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanReturnsEmptyArrayForEmptyDirectory`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `ReflectionException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanIgnoresDotFiles`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/ControllerFinderTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `ReflectionException` in `WaffleTests\Commons\Routing\Router\ControllerFinderTest::testScanReturnsEmptyArrayForEmptyDirectory`.'
+count = 1
+
+[[issues]]
 file = "tests/src/Router/RouteDiscovererTest.php"
 code = "possibly-null-argument"
 message = "Argument #1 of function `is_dir` is possibly `null`, but parameter type `string` does not accept it."
@@ -202,6 +352,210 @@ count = 1
 file = "tests/src/Router/RouteDiscovererTest.php"
 code = "possibly-null-argument"
 message = 'Argument #1 of method `waffle\commons\routing\routediscoverer::__construct` is possibly `null`, but parameter type `false|string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsEmpty`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsFalse`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverFindsRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverFindsRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsEmpty`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsFalse`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverFindsRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsEmpty`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsFalse`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsEmpty`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsFalse`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsEmpty`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteDiscovererTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Routing\Router\RouteDiscovererTest::testDiscoverReturnsEmptyArrayIfDirectoryIsFalse`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "possibly-undefined-array-index"
+message = "Possibly undefined array key `int(0)` accessed on `array<array-key, array{'arguments': array<string, mixed>, 'classname': class-string, 'method': string, 'name': truthy-string, 'path': string}>`."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "possibly-undefined-array-index"
+message = "Possibly undefined array key `string('base_absolute')` accessed on `array<array-key, array<string, mixed>|class-string|string>`."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "possibly-undefined-array-index"
+message = "Possibly undefined array key `string('base_empty')` accessed on `array<array-key, array<string, mixed>|class-string|string>`."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "possibly-undefined-array-index"
+message = "Possibly undefined array key `string('base_relative')` accessed on `array<array-key, array<string, mixed>|class-string|string>`."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "possibly-undefined-array-index"
+message = "Possibly undefined array key `string('default_union')` accessed on `array<array-key, array<string, mixed>|class-string|string>`."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "possibly-undefined-array-index"
+message = "Possibly undefined array key `string('default_untyped')` accessed on `array<array-key, array<string, mixed>|class-string|string>`."
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseHandlesComplexParameters`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseHandlesPathConcatenationCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseIgnoresDuplicateRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseHandlesComplexParameters`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseHandlesPathConcatenationCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseIgnoresDuplicateRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseReturnsEmptyIfClassDoesNotExist`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseReturnsEmptyIfClassHasNoRouteAttribute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseReturnsEmptyIfClassIsAbstract`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseHandlesComplexParameters`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseHandlesPathConcatenationCorrectly`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseIgnoresDuplicateRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseReturnsEmptyIfClassDoesNotExist`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseReturnsEmptyIfClassHasNoRouteAttribute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouteParserTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouteParserTest::testParseReturnsEmptyIfClassIsAbstract`.'
 count = 1
 
 [[issues]]
@@ -256,4 +610,154 @@ count = 1
 file = "tests/src/Router/RouterTest.php"
 code = "no-value"
 message = 'Argument #2 passed to method `phpunit\framework\assert::assertsame` has type `never`, meaning it cannot produce a value.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Routing\Router\RouterTest::setUp`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithDynamicParameterRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithStaticRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Routing\Router\RouterTest::testNoMatchForNonExistentRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\RouterTest::testRegisterRoutesDiscoversAndBuildsRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Routing\Router\RouterTest::testRouteCachingInProductionEnvironment`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testBootLoadsRoutesFromCacheInProduction`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithDynamicParameterRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithStaticRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testNoMatchForNonExistentRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testRegisterRoutesDiscoversAndBuildsRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testRouteCachingInProductionEnvironment`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testRouterHandlesNonExistentDirectoryGracefully`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testRegisterRoutesDiscoversAndBuildsRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testRouteCachingInProductionEnvironment`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Routing\Router\RouterTest::testRouterHandlesNonExistentDirectoryGracefully`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Routing\Router\RouterTest::setUp`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithDynamicParameterRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithStaticRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Routing\Router\RouterTest::testNoMatchForNonExistentRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Routing\Router\RouterTest::setUp`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithDynamicParameterRoutes`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Routing\Router\RouterTest::testMatchWithStaticRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Routing\Router\RouterTest::testNoMatchForNonExistentRoute`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Trait/RequestTraitTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Trait\RequestTraitTest::testGetPathUri`.'
 count = 1
