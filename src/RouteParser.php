@@ -78,7 +78,7 @@ class RouteParser
      * name: non-falsy-string
      * }|null
      */
-    private function createRoute(string $file, Route $classRoute, ReflectionMethod $method, array $routes): null|array
+    private function createRoute(string $file, Route $classRoute, ReflectionMethod $method, array $routes): ?array
     {
         foreach ($method->getAttributes(Route::class) as $attribute) {
             $route = $attribute->newInstance();

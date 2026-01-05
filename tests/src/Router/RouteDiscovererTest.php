@@ -13,7 +13,7 @@ use WaffleTests\Commons\Routing\Helper\MockContainer;
 #[CoversClass(RouteDiscoverer::class)]
 final class RouteDiscovererTest extends TestCase
 {
-    private null|string $tempDir = null;
+    private ?string $tempDir = null;
 
     #[\Override]
     protected function setUp(): void

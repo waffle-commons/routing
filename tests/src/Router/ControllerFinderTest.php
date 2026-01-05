@@ -12,7 +12,7 @@ use WaffleTests\Commons\Routing\AbstractTestCase as TestCase;
 #[CoversClass(ControllerFinder::class)]
 final class ControllerFinderTest extends TestCase
 {
-    private null|string $tempDir = null;
+    private ?string $tempDir = null;
     private ControllerFinder $finder;
 
     #[\Override]

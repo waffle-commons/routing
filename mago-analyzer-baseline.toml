@@ -188,12 +188,6 @@ count = 1
 
 [[issues]]
 file = "tests/src/Helper/MockContainer.php"
-code = "unevaluated-code"
-message = "Unreachable code detected."
-count = 1
-
-[[issues]]
-file = "tests/src/Helper/MockContainer.php"
 code = "unhandled-thrown-type"
 message = 'Potentially unhandled exception `Psr\Container\ContainerExceptionInterface` in `WaffleTests\Commons\Routing\Helper\MockContainer::instantiate`.'
 count = 1

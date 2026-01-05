@@ -11,9 +11,6 @@ trait RequestTrait
      */
     public function getPathUri(string $path): array
     {
-        return explode(
-            separator: DIRECTORY_SEPARATOR,
-            string: $path,
-        );
+        return explode(separator: DIRECTORY_SEPARATOR, string: $path);
     }
 }

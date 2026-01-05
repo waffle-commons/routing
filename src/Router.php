@@ -92,7 +92,7 @@ final class Router implements RouterInterface
      *   }|null Returns the route array if matched, null otherwise.
      */
     #[\Override]
-    public function matchRequest(ServerRequestInterface $request): null|array
+    public function matchRequest(ServerRequestInterface $request): ?array
     {
         foreach ($this->routes as $route) {
             $params = $this->match($request, $route);
