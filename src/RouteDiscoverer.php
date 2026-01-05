@@ -30,7 +30,7 @@ class RouteDiscoverer
      *      name: non-falsy-string
      *  }>
      */
-    public function discover(ContainerInterface $container): array
+    public function discover(ContainerInterface $_container): array
     {
         if (!$this->files) {
             return [];

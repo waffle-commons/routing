@@ -28,7 +28,7 @@ final class RouterTest extends TestCase
         parent::setUp();
         $this->serverBackup = $_SERVER;
 
-        $security = $this->createMock(SecurityInterface::class);
+        $security = $this->createStub(SecurityInterface::class);
 
         // Use MockContainer for testing
         $innerContainer = new MockContainer();
@@ -57,13 +57,15 @@ final class RouterTest extends TestCase
 
         $foundRoute = false;
         foreach ($this->router->routes as $route) {
-            if ('user_users_list' === $route['name']) {
-                $foundRoute = true;
-                static::assertSame(TempController::class, $route['classname']);
-                static::assertSame('/users', $route['path']);
-                static::assertSame('list', $route['method']);
-                break;
+            if ('user_users_list' !== $route['name']) {
+                continue;
             }
+
+            $foundRoute = true;
+            static::assertSame(TempController::class, $route['classname']);
+            static::assertSame('/users', $route['path']);
+            static::assertSame('list', $route['method']);
+            break;
         }
         static::assertTrue($foundRoute);
     }
@@ -73,11 +75,11 @@ final class RouterTest extends TestCase
         $this->router->boot(container: $this->container);
 
         // Use Mocks for Request/Uri
-        $uriMock = $this->createMock(UriInterface::class);
-        $uriMock->method('getPath')->willReturn('/users');
+        $uriStub = $this->createStub(UriInterface::class);
+        $uriStub->method('getPath')->willReturn('/users');
 
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getUri')->willReturn($uriMock);
+        $requestMock = $this->createStub(ServerRequestInterface::class);
+        $requestMock->method('getUri')->willReturn($uriStub);
 
         $matchingRoute = $this->router->matchRequest($requestMock);
 
@@ -90,11 +92,11 @@ final class RouterTest extends TestCase
     {
         $this->router->boot(container: $this->container);
 
-        $uriMock = $this->createMock(UriInterface::class);
-        $uriMock->method('getPath')->willReturn($url);
+        $uriStub = $this->createStub(UriInterface::class);
+        $uriStub->method('getPath')->willReturn($url);
 
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getUri')->willReturn($uriMock);
+        $requestMock = $this->createStub(ServerRequestInterface::class);
+        $requestMock->method('getUri')->willReturn($uriStub);
 
         $matchingRoute = $this->router->matchRequest($requestMock);
 
@@ -114,11 +116,11 @@ final class RouterTest extends TestCase
     {
         $this->router->boot(container: $this->container);
 
-        $uriMock = $this->createMock(UriInterface::class);
-        $uriMock->method('getPath')->willReturn('/non-existent-route');
+        $uriStub = $this->createStub(UriInterface::class);
+        $uriStub->method('getPath')->willReturn('/non-existent-route');
 
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getUri')->willReturn($uriMock);
+        $requestMock = $this->createStub(ServerRequestInterface::class);
+        $requestMock->method('getUri')->willReturn($uriStub);
 
         $matchingRoute = $this->router->matchRequest($requestMock);
 

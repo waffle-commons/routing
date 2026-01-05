@@ -20,12 +20,12 @@ final class TempController
     }
 
     #[Route(path: 'users/{id}', name: 'users_show')]
-    public function show(int $id): void
+    public function show(int $_id): void
     {
     }
 
     #[Route(path: 'users/{id}/{slug}', name: 'users_details')]
-    public function details(int $id, string $slug): void
+    public function details(int $_id, string $_slug): void
     {
     }
 

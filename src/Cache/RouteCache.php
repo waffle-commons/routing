@@ -15,7 +15,7 @@ class RouteCache
      *
      * @return array<mixed>|null Returns the array of routes if cache is hit, null otherwise.
      */
-    public function load(): null|array
+    public function load(): ?array
     {
         if ($this->isProduction()) {
             $cacheFile = $this->getCacheFilePath();

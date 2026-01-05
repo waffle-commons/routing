@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Routing\Trait;
 
-use Waffle\Commons\Contracts\Constant\Constant;
-
 trait RequestTrait
 {
     /**
@@ -13,9 +11,6 @@ trait RequestTrait
      */
     public function getPathUri(string $path): array
     {
-        return explode(
-            separator: DIRECTORY_SEPARATOR,
-            string: $path,
-        );
+        return explode(separator: DIRECTORY_SEPARATOR, string: $path);
     }
 }

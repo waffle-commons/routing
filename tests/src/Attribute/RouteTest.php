@@ -15,10 +15,7 @@ final class RouteTest extends TestCase
         // --- Test Condition ---
         $path = '/test-path';
         $name = 'test_name';
-        $arguments = [new Argument(
-            classType: 'string',
-            paramName: 'id',
-        )];
+        $arguments = [new Argument(classType: 'string', paramName: 'id')];
 
         // --- Execution ---
         $route = new Route($path, $name, $arguments);

@@ -78,7 +78,7 @@ class RouteParser
      * name: non-falsy-string
      * }|null
      */
-    private function createRoute(string $file, Route $classRoute, ReflectionMethod $method, array $routes): null|array
+    private function createRoute(string $file, Route $classRoute, ReflectionMethod $method, array $routes): ?array
     {
         foreach ($method->getAttributes(Route::class) as $attribute) {
             $route = $attribute->newInstance();
@@ -121,11 +121,12 @@ class RouteParser
     {
         $params = [];
         foreach ($method->getParameters() as $param) {
-            if ($param->getType() instanceof ReflectionNamedType) {
-                /** @var ReflectionNamedType $paramType */
-                $paramType = $param->getType();
-                $params[$param->getName()] = $paramType?->getName();
+            if (!$param->getType() instanceof ReflectionNamedType) {
+                continue;
             }
+
+            $paramType = $param->getType();
+            $params[$param->getName()] = $paramType?->getName();
         }
         return $params;
     }
@@ -144,9 +145,11 @@ class RouteParser
     private function isRouteRegistered(string $path, array $routes): bool
     {
         foreach ($routes as $route) {
-            if ($route[Constant::PATH] === $path) {
-                return true;
+            if ($route[Constant::PATH] !== $path) {
+                continue;
             }
+
+            return true;
         }
         return false;
     }

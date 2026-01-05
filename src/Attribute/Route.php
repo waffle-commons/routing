@@ -16,7 +16,7 @@ final class Route
      */
     public function __construct(
         public string $path,
-        public null|string $name = null,
-        public null|array $arguments = null,
+        public ?string $name = null,
+        public ?array $arguments = null,
     ) {}
 }

@@ -19,11 +19,7 @@ final class ArgumentTest extends TestCase
 
         // --- Execution ---
         // Instantiate the Argument attribute.
-        $argument = new Argument(
-            classType: $classType,
-            paramName: $paramName,
-            required: $required,
-        );
+        $argument = new Argument(classType: $classType, paramName: $paramName, required: $required);
 
         // --- Assertions ---
         // Verify that the public properties have been assigned correctly.
@@ -40,10 +36,7 @@ final class ArgumentTest extends TestCase
 
         // --- Execution ---
         // Instantiate without the 'required' parameter to test its default value.
-        $argument = new Argument(
-            classType: $classType,
-            paramName: $paramName,
-        );
+        $argument = new Argument(classType: $classType, paramName: $paramName);
 
         // --- Assertions ---
         // The 'required' property should default to true.
