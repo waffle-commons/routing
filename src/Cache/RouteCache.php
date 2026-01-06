@@ -55,6 +55,6 @@ class RouteCache
 
     private function getCacheFilePath(): string
     {
-        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::CACHE_FILE;
+        return APP_ROOT . '/var/cache/' . Constant::ENV_PROD . DIRECTORY_SEPARATOR . self::CACHE_FILE;
     }
 }
