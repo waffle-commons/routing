@@ -62,9 +62,33 @@ count = 1
 
 [[issues]]
 file = "tests/src/AbstractTestCase.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 2
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "literal-named-argument"
+message = "Literal argument `0777` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
 code = "no-redundant-method-override"
 message = "Redundant method override."
-count = 2
+count = 1
 
 [[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"

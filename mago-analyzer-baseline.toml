@@ -1,6 +1,12 @@
 variant = "loose"
 
 [[issues]]
+file = "src/Cache/RouteCache.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
 file = "src/RouteParser.php"
 code = "non-existent-method"
 message = "Method `getname` does not exist on type `ReflectionIntersectionType`."
@@ -64,6 +70,30 @@ count = 1
 file = "src/Router.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 5
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
@@ -154,7 +184,7 @@ count = 1
 file = "tests/src/Helper/MockContainer.php"
 code = "incompatible-parameter-name"
 message = 'Parameter #2 of `WaffleTests\Commons\Routing\Helper\MockContainer::set()` is named `$service` but parent `Waffle\Commons\Contracts\Container\ContainerInterface::set()` names it `$concrete`'
-count = 2
+count = 1
 
 [[issues]]
 file = "tests/src/Helper/MockContainer.php"
@@ -580,6 +610,12 @@ count = 4
 file = "tests/src/Router/RouterTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "tests/src/Router/RouterTest.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
 count = 2
 
 [[issues]]
