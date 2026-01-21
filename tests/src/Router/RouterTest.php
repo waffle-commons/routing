@@ -132,6 +132,12 @@ final class RouterTest extends TestCase
     {
         putenv('APP_ENV=prod');
         $cacheFile = APP_ROOT . '/var/cache/prod/' . 'waffle_routes_cache.php';
+
+        // FIX: Ensure the cache directory exists
+        $cacheDir = dirname($cacheFile);
+        if (!is_dir($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
+        }
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
         }
@@ -151,6 +157,12 @@ final class RouterTest extends TestCase
     {
         putenv('APP_ENV=prod');
         $cacheFile = APP_ROOT . '/var/cache/prod/' . 'waffle_routes_cache.php';
+
+        // FIX: Ensure the cache directory exists
+        $cacheDir = dirname($cacheFile);
+        if (!is_dir($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
+        }
         $routes = $this->provideRoutesArray();
         $content = '<?php return ' . var_export($routes, true) . ';';
         file_put_contents($cacheFile, $content, LOCK_EX);
