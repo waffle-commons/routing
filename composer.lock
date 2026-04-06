@@ -1286,36 +1286,33 @@
         },
         {
             "name": "carthage-software/mago",
-            "version": "1.0.3",
+            "version": "1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/carthage-software/mago.git",
-                "reference": "4089d700d0c1c2fe8e083afe4734ae5055daf360"
+                "reference": "c9fdcec618d3b80d7eed7f41ef154c21b9f12f01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/carthage-software/mago/zipball/4089d700d0c1c2fe8e083afe4734ae5055daf360",
-                "reference": "4089d700d0c1c2fe8e083afe4734ae5055daf360",
+                "url": "https://api.github.com/repos/carthage-software/mago/zipball/c9fdcec618d3b80d7eed7f41ef154c21b9f12f01",
+                "reference": "c9fdcec618d3b80d7eed7f41ef154c21b9f12f01",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^2.6",
                 "php": "~8.1 || ~8.2 || ~8.3 || ~8.4 || ~8.5 || ~8.6"
             },
-            "require-dev": {
-                "composer/composer": "^2.8"
+            "suggest": {
+                "ext-curl": "To show binary download progress"
             },
             "bin": [
                 "composer/bin/mago"
             ],
-            "type": "composer-plugin",
-            "extra": {
-                "class": "Mago\\MagoPlugin"
-            },
+            "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Mago\\": "composer/"
-                }
+                "files": [
+                    "composer/functions.php",
+                    "composer/internal.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -1333,7 +1330,7 @@
             ],
             "support": {
                 "issues": "https://github.com/carthage-software/mago/issues",
-                "source": "https://github.com/carthage-software/mago/tree/1.0.3"
+                "source": "https://github.com/carthage-software/mago/tree/1.18.1"
             },
             "funding": [
                 {
@@ -1341,7 +1338,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-24T07:50:46+00:00"
+            "time": "2026-04-02T22:14:53+00:00"
         },
         {
             "name": "composer/pcre",
@@ -5455,7 +5452,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "carthage-software/mago": 5,
         "waffle-commons/contracts": 15,
         "waffle-commons/utils": 15
     },
