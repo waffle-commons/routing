@@ -50,8 +50,13 @@ class RouteCache
     {
         if ($this->isProduction()) {
             $cacheFile = $this->getCacheFilePath();
+
+            if (!is_writable(dirname($cacheFile))) {
+                return;
+            }
+
             $content = '<?php return ' . var_export($routes, true) . ';';
-            file_put_contents($cacheFile, $content, LOCK_EX);
+            @file_put_contents($cacheFile, $content, LOCK_EX);
         }
     }
 

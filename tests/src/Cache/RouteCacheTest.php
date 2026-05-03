@@ -128,20 +128,19 @@ final class RouteCacheTest extends TestCase
     {
         putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
 
-        $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_save_test_' . uniqid();
+        $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_save_test_' . uniqid('tmp', true);
         mkdir($readOnlyDir, 0755, true);
-
-        $routeCache = new RouteCache($readOnlyDir);
-        $routesToSave = [['path' => '/readonly', 'name' => 'readonly']];
-
         chmod($readOnlyDir, 0444);
 
-        $routeCache->save($routesToSave);
+        $this->expectException(RouteCacheException::class);
+        $this->expectExceptionMessage('is not writable');
 
-        chmod($readOnlyDir, 0755);
-        rmdir($readOnlyDir);
-
-        static::assertFileDoesNotExist($readOnlyDir . '/waffle_routes_cache.php');
+        try {
+            new RouteCache($readOnlyDir);
+        } finally {
+            chmod($readOnlyDir, 0755);
+            rmdir($readOnlyDir);
+        }
     }
 
     public function testIsProductionHelper(): void
