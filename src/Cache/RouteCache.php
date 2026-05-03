@@ -5,10 +5,22 @@ declare(strict_types=1);
 namespace Waffle\Commons\Routing\Cache;
 
 use Waffle\Commons\Contracts\Constant\Constant;
+use Waffle\Commons\Routing\Exception\RouteCacheException;
 
 class RouteCache
 {
     private const string CACHE_FILE = 'waffle_routes_cache.php';
+
+    public function __construct(
+        private(set) string $cacheDir,
+    ) {
+        if (!is_writable($this->cacheDir)) {
+            throw new RouteCacheException(sprintf(
+                'Cache directory "%s" is not writable. Route caching cannot operate securely.',
+                $this->cacheDir,
+            ));
+        }
+    }
 
     /**
      * Attempts to load routes from the cache file.
@@ -55,6 +67,6 @@ class RouteCache
 
     private function getCacheFilePath(): string
     {
-        return APP_ROOT . '/var/cache/' . Constant::ENV_PROD . DIRECTORY_SEPARATOR . self::CACHE_FILE;
+        return $this->cacheDir . DIRECTORY_SEPARATOR . self::CACHE_FILE;
     }
 }

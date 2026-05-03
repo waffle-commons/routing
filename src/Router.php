@@ -11,6 +11,7 @@ use Waffle\Commons\Contracts\Routing\RouterInterface;
 use Waffle\Commons\Routing\Cache\RouteCache;
 use Waffle\Commons\Routing\Trait\RequestTrait;
 use Waffle\Commons\Utils\Trait\ReflectionTrait;
+use Waffle\Exception\InvalidConfigurationException;
 
 final class Router implements RouterInterface
 {
@@ -45,16 +46,25 @@ final class Router implements RouterInterface
 
     private readonly RouteDiscoverer $discoverer;
 
-    public function __construct(string|false $directory)
+    public function __construct(string|false $directory, ?string $cacheDir = null)
     {
         $this->routes = [];
         $this->files = false;
-        $this->cache = new RouteCache();
+
+        if ($cacheDir === null) {
+            $cacheDir = APP_ROOT . '/var/cache/' . Constant::ENV_PROD;
+        }
+
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0755, true);
+        }
+
+        $this->cache = new RouteCache($cacheDir);
         $this->discoverer = new RouteDiscoverer(directory: $directory);
     }
 
     #[\Override]
-    public function boot(ContainerInterface $container): self
+    public function boot(ContainerInterface $container): static
     {
         $cachedRoutes = $this->cache->load();
         if (null !== $cachedRoutes) {

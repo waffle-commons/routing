@@ -27,7 +27,7 @@ count = 1
 [[issues]]
 file = "src/RouteParser.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.7000000000000002)."
+message = "Class has a high kan defect score."
 count = 1
 
 [[issues]]
@@ -56,8 +56,38 @@ count = 1
 
 [[issues]]
 file = "src/Router.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
 code = "literal-named-argument"
 message = "Literal argument `'{}'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "literal-named-argument"
+message = "Literal argument `0755` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "src/Router.php"
+code = "no-redundant-use"
+message = "Unused import: `InvalidConfigurationException`."
 count = 1
 
 [[issues]]
@@ -92,6 +122,12 @@ count = 1
 
 [[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 6
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
 code = "literal-named-argument"
 message = """Literal argument `'<?php return ["dummy_route"];'` should be passed as a named argument for clarity."""
 count = 1
@@ -99,8 +135,20 @@ count = 1
 [[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"
 code = "literal-named-argument"
+message = "Literal argument `0444` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "literal-named-argument"
+message = "Literal argument `0755` should be passed as a named argument for clarity."
+count = 4
+
+[[issues]]
+file = "tests/src/Cache/RouteCacheTest.php"
+code = "literal-named-argument"
 message = "Literal argument `true` should be passed as a named argument for clarity."
-count = 1
+count = 4
 
 [[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"
@@ -137,6 +185,12 @@ file = "tests/src/Helper/MockContainer.php"
 code = "no-else-clause"
 message = "Avoid `elseif` clauses."
 count = 1
+
+[[issues]]
+file = "tests/src/Helper/MockContainer.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
 
 [[issues]]
 file = "tests/src/Router/ControllerFinderTest.php"

@@ -6,7 +6,5 @@ namespace WaffleTests\Commons\Routing\Helper\Controller;
 
 final class NoRouteController
 {
-    public function index(): void
-    {
-    }
+    public function index(): void {}
 }

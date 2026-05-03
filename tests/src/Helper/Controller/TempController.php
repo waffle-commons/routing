@@ -15,24 +15,16 @@ use Waffle\Commons\Routing\Attribute\Route;
 final class TempController
 {
     #[Route(path: 'users', name: 'users_list')]
-    public function list(): void
-    {
-    }
+    public function list(): void {}
 
     #[Route(path: 'users/{id}', name: 'users_show')]
-    public function show(int $_id): void
-    {
-    }
+    public function show(int $_id): void {}
 
     #[Route(path: 'users/{id}/{slug}', name: 'users_details')]
-    public function details(int $_id, string $_slug): void
-    {
-    }
+    public function details(int $_id, string $_slug): void {}
 
     #[Route(path: 'users/profile/view', name: 'users_profile_view')]
-    public function profile(): void
-    {
-    }
+    public function profile(): void {}
 
     /**
      * @throws Exception
