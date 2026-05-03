@@ -10,17 +10,11 @@ use Waffle\Commons\Routing\Attribute\Route;
 final class PathConcatenationController
 {
     #[Route('/absolute', name: 'absolute')]
-    public function absolute(): void
-    {
-    }
+    public function absolute(): void {}
 
     #[Route('relative', name: 'relative')]
-    public function relative(): void
-    {
-    }
+    public function relative(): void {}
 
     #[Route('', name: 'empty')]
-    public function empty(): void
-    {
-    }
+    public function empty(): void {}
 }

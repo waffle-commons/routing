@@ -8,11 +8,12 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Waffle\Commons\Contracts\Constant\Constant;
 use Waffle\Commons\Routing\Cache\RouteCache;
+use Waffle\Commons\Routing\Exception\RouteCacheException;
 
 #[CoversClass(RouteCache::class)]
 final class RouteCacheTest extends TestCase
 {
-    private RouteCache $routeCache;
+    private string $cacheDir;
     private string $cacheFilePath;
     private mixed $originalAppEnv;
 
@@ -20,73 +21,72 @@ final class RouteCacheTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->routeCache = new RouteCache();
 
-        // Use reflection to get the private cache file path for testing
-        $reflector = new \ReflectionClass(RouteCache::class);
-        $method = $reflector->getMethod('getCacheFilePath');
-        // $method->setAccessible(true); // No longer needed in PHP 8.1+ for private methods if called from same scope/instance
-        $this->cacheFilePath = $method->invoke($this->routeCache); // Call on instance
-
-        // Clean up any potential leftover cache file
-        if (file_exists($this->cacheFilePath)) {
-            unlink($this->cacheFilePath);
+        $this->cacheDir = sys_get_temp_dir() . '/waffle_cache_test_' . uniqid();
+        if (!is_dir($this->cacheDir)) {
+            mkdir($this->cacheDir, 0755, true);
         }
+        $this->cacheFilePath = $this->cacheDir . DIRECTORY_SEPARATOR . 'waffle_routes_cache.php';
 
-        // Backup original APP_ENV
         $this->originalAppEnv = getenv(Constant::APP_ENV);
     }
 
     #[\Override]
     protected function tearDown(): void
     {
-        // Clean up cache file after each test
         if (file_exists($this->cacheFilePath)) {
             unlink($this->cacheFilePath);
         }
-        // Restore original APP_ENV
+        if (is_dir($this->cacheDir)) {
+            rmdir($this->cacheDir);
+        }
         if ($this->originalAppEnv === false) {
-            putenv(Constant::APP_ENV); // Unset if it wasn't set before
+            putenv(Constant::APP_ENV);
         } else {
             putenv(Constant::APP_ENV . '=' . $this->originalAppEnv);
         }
         parent::tearDown();
     }
 
+    public function testConstructorThrowsOnNonWritableDirectory(): void
+    {
+        $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_test_' . uniqid();
+        mkdir($readOnlyDir, 0444, true);
+
+        $this->expectException(RouteCacheException::class);
+        $this->expectExceptionMessage('is not writable');
+
+        try {
+            new RouteCache($readOnlyDir);
+        } finally {
+            chmod($readOnlyDir, 0755);
+            rmdir($readOnlyDir);
+        }
+    }
+
     public function testLoadReturnsNullWhenNotInProduction(): void
     {
-        // Arrange
         putenv(Constant::APP_ENV . '=' . Constant::ENV_DEV);
-        // Create a dummy cache file to ensure it's ignored
+        $routeCache = new RouteCache($this->cacheDir);
+
         file_put_contents($this->cacheFilePath, '<?php return ["dummy_route"];');
 
-        // Act
-        $result = $this->routeCache->load();
-
-        // Assert
-        static::assertNull($result);
+        static::assertNull($routeCache->load());
     }
 
     public function testLoadReturnsNullWhenInProductionButCacheFileDoesNotExist(): void
     {
-        // Arrange
         putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
-        // Ensure cache file does not exist
-        if (file_exists($this->cacheFilePath)) {
-            unlink($this->cacheFilePath);
-        }
+        $routeCache = new RouteCache($this->cacheDir);
 
-        // Act
-        $result = $this->routeCache->load();
-
-        // Assert
-        static::assertNull($result);
+        static::assertNull($routeCache->load());
     }
 
     public function testLoadReturnsRoutesWhenInProductionAndCacheExists(): void
     {
-        // Arrange
         putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
+        $routeCache = new RouteCache($this->cacheDir);
+
         $expectedRoutes = [
             ['path' => '/', 'controller' => 'HomeController', 'name' => 'home'],
             ['path' => '/about', 'controller' => 'AboutController', 'name' => 'about'],
@@ -94,65 +94,72 @@ final class RouteCacheTest extends TestCase
         $content = '<?php return ' . var_export($expectedRoutes, true) . ';';
         file_put_contents($this->cacheFilePath, $content);
 
-        // Act
-        $result = $this->routeCache->load();
-
-        // Assert
-        static::assertSame($expectedRoutes, $result);
+        static::assertSame($expectedRoutes, $routeCache->load());
     }
 
     public function testSaveDoesNothingWhenNotInProduction(): void
     {
-        // Arrange
         putenv(Constant::APP_ENV . '=' . Constant::ENV_DEV);
+        $routeCache = new RouteCache($this->cacheDir);
         $routesToSave = [['path' => '/test', 'name' => 'test']];
 
-        // Act
-        $this->routeCache->save($routesToSave);
+        $routeCache->save($routesToSave);
 
-        // Assert
         static::assertFileDoesNotExist($this->cacheFilePath);
     }
 
     public function testSaveWritesCacheFileWhenInProduction(): void
     {
-        // Arrange
         putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
+        $routeCache = new RouteCache($this->cacheDir);
         $routesToSave = [
             ['path' => '/save-test', 'controller' => 'SaveController', 'name' => 'save_test'],
         ];
 
-        // Act
-        $this->routeCache->save($routesToSave);
+        $routeCache->save($routesToSave);
 
-        // Assert
         static::assertFileExists($this->cacheFilePath);
         /** @var array<array<string, string>> $loadedRoutes */
         $loadedRoutes = require $this->cacheFilePath;
         static::assertSame($routesToSave, $loadedRoutes);
     }
 
+    public function testReadOnlyFilesystemPreventsCacheSave(): void
+    {
+        putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
+
+        $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_save_test_' . uniqid('tmp', true);
+        mkdir($readOnlyDir, 0755, true);
+        chmod($readOnlyDir, 0444);
+
+        $this->expectException(RouteCacheException::class);
+        $this->expectExceptionMessage('is not writable');
+
+        try {
+            new RouteCache($readOnlyDir);
+        } finally {
+            chmod($readOnlyDir, 0755);
+            rmdir($readOnlyDir);
+        }
+    }
+
     public function testIsProductionHelper(): void
     {
-        // Use reflection to test the private helper method
+        $routeCache = new RouteCache($this->cacheDir);
+
         $reflector = new \ReflectionClass(RouteCache::class);
         $method = $reflector->getMethod('isProduction');
-        // $method->setAccessible(true); // Not needed PHP 8.1+
 
         putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
-        static::assertTrue($method->invoke($this->routeCache), 'isProduction should be true for prod env');
+        static::assertTrue($method->invoke($routeCache), 'isProduction should be true for prod env');
 
         putenv(Constant::APP_ENV . '=' . Constant::ENV_DEV);
-        static::assertFalse($method->invoke($this->routeCache), 'isProduction should be false for dev env');
+        static::assertFalse($method->invoke($routeCache), 'isProduction should be false for dev env');
 
         putenv(Constant::APP_ENV . '=' . Constant::ENV_TEST);
-        static::assertFalse($method->invoke($this->routeCache), 'isProduction should be false for test env');
+        static::assertFalse($method->invoke($routeCache), 'isProduction should be false for test env');
 
-        // Test default case (should be prod if not set)
-        putenv(Constant::APP_ENV); // Unset
-        static::assertTrue(
-            $method->invoke($this->routeCache),
-            'isProduction should default to true if env var is not set',
-        );
+        putenv(Constant::APP_ENV);
+        static::assertTrue($method->invoke($routeCache), 'isProduction should default to true if env var is not set');
     }
 }
