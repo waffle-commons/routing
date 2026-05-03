@@ -129,12 +129,6 @@ count = 1
 [[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testReadOnlyFilesystemPreventsCacheSave`.'
-count = 1
-
-[[issues]]
-file = "tests/src/Cache/RouteCacheTest.php"
-code = "unhandled-thrown-type"
 message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Routing\Cache\RouteCacheTest::testSaveDoesNothingWhenNotInProduction`.'
 count = 1
 

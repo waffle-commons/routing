@@ -13,6 +13,12 @@ message = "Literal argument `true` should be passed as a named argument for clar
 count = 1
 
 [[issues]]
+file = "src/Cache/RouteCache.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
 file = "src/ControllerFinder.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -148,7 +154,7 @@ count = 4
 file = "tests/src/Cache/RouteCacheTest.php"
 code = "literal-named-argument"
 message = "Literal argument `true` should be passed as a named argument for clarity."
-count = 4
+count = 5
 
 [[issues]]
 file = "tests/src/Cache/RouteCacheTest.php"
