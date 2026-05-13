@@ -23,7 +23,7 @@ final class ControllerFinderTest extends TestCase
 
         // Create a unique temporary directory for file system operations
         $this->tempDir = sys_get_temp_dir() . '/waffle_finder_test_' . uniqid('', true);
-        if (!mkdir($this->tempDir, 0777, true) && !is_dir($this->tempDir)) {
+        if (!mkdir($this->tempDir, 0o777, true) && !is_dir($this->tempDir)) {
             $this->fail("Could not create temporary directory: {$this->tempDir}");
         }
     }

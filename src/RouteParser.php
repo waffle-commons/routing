@@ -39,7 +39,7 @@ class RouteParser
         // Check if the class has the #[Route] attribute.
         // If not, it's not a controller we care about.
         $attributes = $reflection->getAttributes(Route::class);
-        if (empty($attributes)) {
+        if ($attributes === []) {
             return [];
         }
 
@@ -80,37 +80,37 @@ class RouteParser
      */
     private function createRoute(string $file, Route $classRoute, ReflectionMethod $method, array $routes): ?array
     {
-        foreach ($method->getAttributes(Route::class) as $attribute) {
-            $route = $attribute->newInstance();
-
-            // --- Improved Path Concatenation ---
-            $basePath = rtrim($classRoute->path, '/'); // Examples: '' (for '/'), '/admin'
-            $methodPath = ltrim($route->path, '/'); // Examples: '', 'users', 'users/{id}'
-
-            // If the method path is empty, use the base path directly. If base was '/', ensure path is '/'.
-            if ($methodPath === '') {
-                $path = $basePath === '' ? '/' : $basePath;
-            }
-            // If the base path is empty (was '/'), just use the method path prefixed with '/'
-            elseif ($basePath === '') {
-                $path = '/' . $methodPath;
-            }
-            // Otherwise, join them with a single slash
-            else {
-                $path = $basePath . '/' . $methodPath;
-            }
-            // --- End Improved Path Concatenation ---
-
-            if (!$this->isRouteRegistered($path, $routes)) {
-                return [
-                    Constant::CLASSNAME => $file,
-                    Constant::METHOD => $method->getName(),
-                    Constant::ARGUMENTS => $this->extractParameters($method),
-                    Constant::PATH => $path, // Use the cleaned path
-                    Constant::NAME => ($classRoute->name ?? 'default') . '_' . ($route->name ?? 'default'),
-                ];
-            }
+        $attributes = $method->getAttributes(Route::class);
+        if ($attributes === []) {
+            return null;
         }
+
+        $route = $attributes[0]->newInstance();
+
+        // --- Improved Path Concatenation ---
+        $slash = '/';
+        $basePath = rtrim($classRoute->path, $slash); // Examples: '' (for '/'), '/admin'
+        $methodPath = ltrim($route->path, $slash); // Examples: '', 'users', 'users/{id}'
+
+        if ($methodPath === '') {
+            $path = $basePath === '' ? '/' : $basePath;
+        } elseif ($basePath === '') {
+            $path = '/' . $methodPath;
+        } else {
+            $path = $basePath . '/' . $methodPath;
+        }
+        // --- End Improved Path Concatenation ---
+
+        if (!$this->isRouteRegistered($path, $routes)) {
+            return [
+                Constant::CLASSNAME => $file,
+                Constant::METHOD => $method->getName(),
+                Constant::ARGUMENTS => $this->extractParameters($method),
+                Constant::PATH => $path, // Use the cleaned path
+                Constant::NAME => ($classRoute->name ?? 'default') . '_' . ($route->name ?? 'default'),
+            ];
+        }
+
         return null;
     }
 

@@ -44,7 +44,7 @@ find-unused-definitions = true
 find-unused-expressions = true
 analyze-dead-code = true
 strict-list-index-checks = true
-allow-possibly-undefined-array-keys = false
+strict-array-index-existence = true
 ignore = [
     { code = "mixed-assignment", in = [
         "tests/",

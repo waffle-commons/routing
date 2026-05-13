@@ -136,7 +136,7 @@ final class RouterTest extends TestCase
         // FIX: Ensure the cache directory exists
         $cacheDir = dirname($cacheFile);
         if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
+            mkdir($cacheDir, mode: 0o777, recursive: true);
         }
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
@@ -161,7 +161,7 @@ final class RouterTest extends TestCase
         // FIX: Ensure the cache directory exists
         $cacheDir = dirname($cacheFile);
         if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
+            mkdir($cacheDir, mode: 0o777, recursive: true);
         }
         $routes = $this->provideRoutesArray();
         $content = '<?php return ' . var_export($routes, true) . ';';

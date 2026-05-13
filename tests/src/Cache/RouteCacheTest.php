@@ -24,7 +24,7 @@ final class RouteCacheTest extends TestCase
 
         $this->cacheDir = sys_get_temp_dir() . '/waffle_cache_test_' . uniqid();
         if (!is_dir($this->cacheDir)) {
-            mkdir($this->cacheDir, 0755, true);
+            mkdir($this->cacheDir, 0o755, true);
         }
         $this->cacheFilePath = $this->cacheDir . DIRECTORY_SEPARATOR . 'waffle_routes_cache.php';
 
@@ -51,7 +51,7 @@ final class RouteCacheTest extends TestCase
     public function testConstructorThrowsOnNonWritableDirectory(): void
     {
         $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_test_' . uniqid();
-        mkdir($readOnlyDir, 0444, true);
+        mkdir($readOnlyDir, 0o444, true);
 
         $this->expectException(RouteCacheException::class);
         $this->expectExceptionMessage('is not writable');
@@ -129,7 +129,7 @@ final class RouteCacheTest extends TestCase
         putenv(Constant::APP_ENV . '=' . Constant::ENV_PROD);
 
         $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_save_test_' . uniqid('tmp', true);
-        mkdir($readOnlyDir, 0755, true);
+        mkdir($readOnlyDir, 0o755, true);
         chmod($readOnlyDir, 0444);
 
         $this->expectException(RouteCacheException::class);

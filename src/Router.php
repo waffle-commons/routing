@@ -11,7 +11,6 @@ use Waffle\Commons\Contracts\Routing\RouterInterface;
 use Waffle\Commons\Routing\Cache\RouteCache;
 use Waffle\Commons\Routing\Trait\RequestTrait;
 use Waffle\Commons\Utils\Trait\ReflectionTrait;
-use Waffle\Exception\InvalidConfigurationException;
 
 final class Router implements RouterInterface
 {
@@ -56,7 +55,7 @@ final class Router implements RouterInterface
         }
 
         if (!is_dir($cacheDir)) {
-            @mkdir($cacheDir, 0755, true);
+            mkdir($cacheDir, mode: 0o755, recursive: true);
         }
 
         $this->cache = new RouteCache($cacheDir);
