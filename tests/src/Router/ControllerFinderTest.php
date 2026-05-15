@@ -12,7 +12,7 @@ use WaffleTests\Commons\Routing\AbstractTestCase as TestCase;
 #[CoversClass(ControllerFinder::class)]
 final class ControllerFinderTest extends TestCase
 {
-    private ?string $tempDir = null;
+    private string $tempDir = '';
     private ControllerFinder $finder;
 
     #[\Override]
@@ -32,10 +32,10 @@ final class ControllerFinderTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up the temporary directory recursively
-        if ($this->tempDir && is_dir($this->tempDir)) {
+        if ($this->tempDir !== '' && is_dir($this->tempDir)) {
             $this->recursiveDelete($this->tempDir);
         }
-        $this->tempDir = null;
+        $this->tempDir = '';
         parent::tearDown();
     }
 

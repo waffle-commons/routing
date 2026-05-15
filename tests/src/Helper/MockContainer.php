@@ -32,7 +32,7 @@ class MockContainer implements ContainerInterface, PsrContainerInterface
     private function resolve(string $id)
     {
         // Check for circular dependency
-        if (isset($this->building[$id])) {
+        if (array_key_exists($id, $this->building)) {
             throw new class('Circular dependency detected') extends \Exception implements
                 ContainerExceptionInterface {};
         }
@@ -109,13 +109,13 @@ class MockContainer implements ContainerInterface, PsrContainerInterface
     #[\Override]
     public function has(string $id): bool
     {
-        return isset($this->services[$id]) || class_exists($id);
+        return array_key_exists($id, $this->services) || class_exists($id);
     }
 
     #[\Override]
-    public function set(string $id, mixed $service): void
+    public function set(string $id, object|callable|string $concrete): void
     {
-        $this->services[$id] = $service;
+        $this->services[$id] = $concrete;
     }
 
     public function reset(): void {}

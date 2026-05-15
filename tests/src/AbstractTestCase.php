@@ -29,12 +29,6 @@ abstract class AbstractTestCase extends BaseTestCase
         parent::setUp();
     }
 
-    #[\Override]
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-    }
-
     private function _recursiveDelete(string $dir): void
     {
         if (!is_dir($dir)) {

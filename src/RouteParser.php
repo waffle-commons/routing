@@ -46,10 +46,6 @@ class RouteParser
         // 2. Instantiate the Route attribute directly from reflection
         $classRoute = $attributes[0]->newInstance();
 
-        if (!$classRoute instanceof Route) {
-            return [];
-        }
-
         $routes = [];
         foreach ($reflection->getMethods() as $method) {
             $newRoute = $this->createRoute($controllerClass, $classRoute, $method, $routes);

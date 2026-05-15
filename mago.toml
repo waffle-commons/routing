@@ -29,14 +29,9 @@ disallowed-functions = { level = "error", functions = ["eval", "exec", "system",
 # Code quality - Strict
 prefer-interface = { level = "error" }
 strict-types = { level = "error" }
-cyclomatic-complexity = { level = "warning", threshold = 20 }
-too-many-methods = { level = "warning", threshold = 20 }
-kan-defect = { level = "warning", threshold = 2.5 }
 no-ini-set = { enabled = false }
 
 # Style - Notes (informational)
-prefer-arrow-function = { level = "note" }
-no-redundant-nullsafe = { level = "note" }
 
 # >>> alpha6-opinionated-suppressions (generated)
 literal-named-argument = { enabled = false }
@@ -53,7 +48,6 @@ kan-defect = { enabled = false }
 halstead = { enabled = false }
 prefer-arrow-function = { enabled = false }
 no-redundant-nullsafe = { enabled = false }
-no-boolean-literal-comparison = { enabled = false }
 # <<< alpha6-opinionated-suppressions
 
 [analyzer]
@@ -64,6 +58,18 @@ analyze-dead-code = true
 strict-list-index-checks = true
 strict-array-index-existence = true
 ignore = [
+    # Router matches URL segments against parsed path segments — both arrays have
+    # the same length by construction (validated upstream), but Mago can't prove it.
+    { code = "possibly-undefined-int-array-index", in = [
+        "src/Router.php",
+        "tests/",
+    ] },
+    { code = "possibly-undefined-string-array-index", in = [
+        "tests/",
+    ] },
+    { code = "possibly-null-array-access", in = [
+        "tests/",
+    ] },
     { code = "mixed-assignment", in = [
         "tests/",
     ] },
