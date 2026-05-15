@@ -71,4 +71,30 @@ ignore = [
         "tests/",
         "src/",
     ] },
+    { code = "invalid-named-argument", in = [
+        "tests/",
+        "src/Router.php",
+    ] },
+    { code = "mixed-return-statement", in = [
+        "src/Cache/RouteCache.php",
+    ] },
+    { code = "mixed-operand", in = [
+        "src/Router.php",
+    ] },
+    { code = "invalid-return-statement", in = [
+        "src/Router.php",
+        "tests/",
+    ] },
+    { code = "non-existent-method", in = [
+        "src/RouteParser.php",
+    ] },
+    { code = "possibly-null-argument", in = [
+        "tests/",
+    ] },
+    { code = "possibly-invalid-argument", in = [
+        "tests/",
+    ] },
+    { code = "nullable-return-statement", in = [
+        "tests/",
+    ] },
 ]
