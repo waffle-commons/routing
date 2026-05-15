@@ -96,4 +96,21 @@ final class RouteParserTest extends TestCase
         static::assertArrayHasKey('default_union', $args);
         static::assertEmpty($args['default_union']);
     }
+
+    public function testParseHandlesEmptyBasePathAndTypedParameter(): void
+    {
+        $parser = new RouteParser();
+
+        $routes = $parser->parse(\WaffleTests\Commons\Routing\Helper\Controller\TypedRootController::class);
+
+        // Only `show` carries a Route attribute; `notARoute` is intentionally skipped.
+        static::assertCount(1, $routes);
+
+        $route = $routes[0];
+        // Class-level Route('/') trims to empty basePath; method path 'items/{id}' triggers the '/' + methodPath branch.
+        static::assertSame('/items/{id}', $route['path']);
+        // ReflectionNamedType extraction populates the typed-parameter map.
+        static::assertSame(['id' => 'int'], $route['arguments']);
+        static::assertSame('root_item', $route['name']);
+    }
 }

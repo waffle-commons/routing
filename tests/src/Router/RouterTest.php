@@ -53,7 +53,7 @@ final class RouterTest extends TestCase
         $this->router->boot(container: $this->container);
 
         static::assertNotEmpty($this->router->routes);
-        static::assertCount(11, $this->router->routes);
+        static::assertCount(12, $this->router->routes);
 
         $foundRoute = false;
         foreach ($this->router->routes as $route) {
@@ -136,7 +136,7 @@ final class RouterTest extends TestCase
         // FIX: Ensure the cache directory exists
         $cacheDir = dirname($cacheFile);
         if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, mode: 0o777, recursive: true);
+            mkdir(directory: $cacheDir, permissions: 0o777, recursive: true);
         }
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
@@ -147,7 +147,7 @@ final class RouterTest extends TestCase
 
         $cachedRoutes = require $cacheFile;
         static::assertNotEmpty($cachedRoutes);
-        static::assertCount(11, $cachedRoutes);
+        static::assertCount(12, $cachedRoutes);
 
         unlink($cacheFile);
         putenv('APP_ENV=test');
@@ -161,7 +161,7 @@ final class RouterTest extends TestCase
         // FIX: Ensure the cache directory exists
         $cacheDir = dirname($cacheFile);
         if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, mode: 0o777, recursive: true);
+            mkdir(directory: $cacheDir, permissions: 0o777, recursive: true);
         }
         $routes = $this->provideRoutesArray();
         $content = '<?php return ' . var_export($routes, true) . ';';
@@ -184,6 +184,17 @@ final class RouterTest extends TestCase
         $badRouter->boot(container: $this->container);
 
         static::assertEmpty($badRouter->routes);
+    }
+
+    public function testGetRoutesReturnsTheDiscoveredRouteCollection(): void
+    {
+        $this->router->boot(container: $this->container);
+
+        $routes = $this->router->getRoutes();
+
+        static::assertNotEmpty($routes);
+        // Public getter must return the same collection as the asymmetric-visibility property.
+        static::assertSame($this->router->routes, $routes);
     }
 
     private function provideRoutesArray(): array
