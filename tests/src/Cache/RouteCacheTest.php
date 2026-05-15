@@ -59,7 +59,7 @@ final class RouteCacheTest extends TestCase
         try {
             new RouteCache($readOnlyDir);
         } finally {
-            chmod($readOnlyDir, 0755);
+            chmod($readOnlyDir, 0o755);
             rmdir($readOnlyDir);
         }
     }
@@ -130,7 +130,7 @@ final class RouteCacheTest extends TestCase
 
         $readOnlyDir = sys_get_temp_dir() . '/waffle_readonly_save_test_' . uniqid('tmp', true);
         mkdir($readOnlyDir, 0o755, true);
-        chmod($readOnlyDir, 0444);
+        chmod($readOnlyDir, 0o444);
 
         $this->expectException(RouteCacheException::class);
         $this->expectExceptionMessage('is not writable');
@@ -138,7 +138,7 @@ final class RouteCacheTest extends TestCase
         try {
             new RouteCache($readOnlyDir);
         } finally {
-            chmod($readOnlyDir, 0755);
+            chmod($readOnlyDir, 0o755);
             rmdir($readOnlyDir);
         }
     }

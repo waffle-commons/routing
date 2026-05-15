@@ -35,7 +35,7 @@ abstract class AbstractTestCase extends BaseTestCase
         parent::tearDown();
     }
 
-    private function recursiveDelete(string $dir): void
+    private function _recursiveDelete(string $dir): void
     {
         if (!is_dir($dir)) {
             return;

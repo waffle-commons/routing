@@ -22,7 +22,7 @@ class MockContainer implements ContainerInterface, PsrContainerInterface
             if (class_exists($id)) {
                 return $this->resolve($id);
             }
-            throw new class("Service or class \"$id\" not found.") extends \Exception implements
+            throw new class("Service or class \"{$id}\" not found.") extends \Exception implements
                 NotFoundExceptionInterface {};
         }
 
@@ -70,7 +70,7 @@ class MockContainer implements ContainerInterface, PsrContainerInterface
         $reflector = new \ReflectionClass($class);
 
         if (!$reflector->isInstantiable()) {
-            throw new class("Class $class is not instantiable") extends \Exception implements
+            throw new class("Class {$class} is not instantiable") extends \Exception implements
                 ContainerExceptionInterface {};
         }
 
