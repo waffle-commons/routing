@@ -72,6 +72,8 @@ ignore = [
     ] },
     { code = "mixed-assignment", in = [
         "tests/",
+        # PSR-16 `get()` returns mixed by spec — the Router validates with is_array() before use.
+        "src/Router.php",
     ] },
     { code = "mixed-argument", in = [
         "tests/",
@@ -98,9 +100,6 @@ ignore = [
     { code = "invalid-named-argument", in = [
         "tests/",
         "src/Router.php",
-    ] },
-    { code = "mixed-return-statement", in = [
-        "src/Cache/RouteCache.php",
     ] },
     { code = "mixed-operand", in = [
         "src/Router.php",
