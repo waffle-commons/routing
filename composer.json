@@ -1,6 +1,6 @@
 {
     "name": "waffle-commons/routing",
-    "version": "0.1.0-alpha5",
+    "version": "0.1.0-beta0",
     "description": "Routing component for Waffle framework.",
     "type": "library",
     "license": "MIT",
@@ -38,6 +38,7 @@
         "formatter": "vendor/bin/mago fmt",
         "linter": "vendor/bin/mago lint",
         "analyzer": "vendor/bin/mago analyze",
+        "guard": "vendor/bin/mago guard",
         "phpunit": "vendor/bin/phpunit --log-junit var/data/phpunit-coverage/junit.xml --coverage-html var/data/phpunit-coverage",
         "benchmark": [
             "Composer\\Config::disableProcessTimeout",
@@ -46,7 +47,8 @@
         "mago": [
             "@formatter",
             "@linter",
-            "@analyzer"
+            "@analyzer",
+            "@guard"
         ],
         "tests": [
             "@phpunit"

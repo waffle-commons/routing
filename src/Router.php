@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace Waffle\Commons\Routing;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Constant\Constant;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
-use Waffle\Commons\Routing\Cache\RouteCache;
 use Waffle\Commons\Routing\Trait\RequestTrait;
 use Waffle\Commons\Utils\Trait\ReflectionTrait;
-use Waffle\Exception\InvalidConfigurationException;
 
 final class Router implements RouterInterface
 {
     use ReflectionTrait;
     use RequestTrait;
+
+    private const string CACHE_KEY = 'waffle.routes.discovered';
 
     private(set) string|false $directory {
         set => $this->directory = $value;
@@ -42,49 +43,41 @@ final class Router implements RouterInterface
         set => $this->routes = $value;
     }
 
-    private readonly RouteCache $cache;
-
     private readonly RouteDiscoverer $discoverer;
 
-    public function __construct(string|false $directory, ?string $cacheDir = null)
-    {
+    public function __construct(
+        string|false $directory,
+        private readonly ?CacheInterface $cache = null,
+    ) {
         $this->routes = [];
         $this->files = false;
 
-        if ($cacheDir === null) {
-            $cacheDir = APP_ROOT . '/var/cache/' . Constant::ENV_PROD;
-        }
-
-        if (!is_dir($cacheDir)) {
-            @mkdir($cacheDir, 0755, true);
-        }
-
-        $this->cache = new RouteCache($cacheDir);
         $this->discoverer = new RouteDiscoverer(directory: $directory);
     }
 
     #[\Override]
     public function boot(ContainerInterface $container): static
     {
-        $cachedRoutes = $this->cache->load();
-        if (null !== $cachedRoutes) {
-            /**
-             * @var array<array-key, array{
-             *      classname: class-string,
-             *      method: string,
-             *      arguments: array<string, mixed>,
-             *      path: string,
-             *      name: non-falsy-string
-             *  }> $routesArray
-             */
-            $routesArray = $cachedRoutes;
-            $this->routes = $routesArray;
+        if ($this->cache !== null) {
+            $cachedRoutes = $this->cache->get(self::CACHE_KEY);
+            if (is_array($cachedRoutes)) {
+                /**
+                 * @var array<array-key, array{
+                 *      classname: class-string,
+                 *      method: string,
+                 *      arguments: array<string, mixed>,
+                 *      path: string,
+                 *      name: non-falsy-string
+                 *  }> $cachedRoutes
+                 */
+                $this->routes = $cachedRoutes;
 
-            return $this;
+                return $this;
+            }
         }
 
         $this->routes = $this->discoverer->discover($container);
-        $this->cache->save($this->routes);
+        $this->cache?->set(self::CACHE_KEY, $this->routes);
 
         return $this;
     }

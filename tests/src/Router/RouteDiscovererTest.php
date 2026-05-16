@@ -69,7 +69,8 @@ final class RouteDiscovererTest extends TestCase
         // AbstractUninstantiable has 0 routes.
         // PathConcatenationController has 3 routes.
         // ComplexParametersController has 2 routes.
-        // Total should be 11.
-        static::assertCount(11, $routes);
+        // TypedRootController has 1 route (the no-Route method is skipped).
+        // Total should be 12.
+        static::assertCount(12, $routes);
     }
 }

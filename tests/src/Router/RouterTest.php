@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace WaffleTests\Commons\Routing\Router;
 
+use DateInterval;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
 use Waffle\Commons\Contracts\Security\SecurityInterface;
 use Waffle\Commons\Routing\Router;
@@ -46,14 +48,13 @@ final class RouterTest extends TestCase
         parent::tearDown();
     }
 
-    // ... (testRegisterRoutesDiscoversAndBuildsRoutes remains unchanged) ...
     public function testRegisterRoutesDiscoversAndBuildsRoutes(): void
     {
         // We need a container for boot
         $this->router->boot(container: $this->container);
 
         static::assertNotEmpty($this->router->routes);
-        static::assertCount(11, $this->router->routes);
+        static::assertCount(12, $this->router->routes);
 
         $foundRoute = false;
         foreach ($this->router->routes as $route) {
@@ -127,54 +128,29 @@ final class RouterTest extends TestCase
         static::assertNull($matchingRoute);
     }
 
-    // ... (Rest of tests unchanged) ...
-    public function testRouteCachingInProductionEnvironment(): void
+    public function testBootDiscoversAndPersistsRoutesIntoCache(): void
     {
-        putenv('APP_ENV=prod');
-        $cacheFile = APP_ROOT . '/var/cache/prod/' . 'waffle_routes_cache.php';
+        $cache = $this->makeStubCache();
+        $router = new Router(directory: 'tests/src/Helper/Controller', cache: $cache);
 
-        // FIX: Ensure the cache directory exists
-        $cacheDir = dirname($cacheFile);
-        if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
-        }
-        if (file_exists($cacheFile)) {
-            unlink($cacheFile);
-        }
+        $router->boot(container: $this->container);
 
-        $this->router->boot(container: $this->container);
-        static::assertFileExists($cacheFile);
-
-        $cachedRoutes = require $cacheFile;
-        static::assertNotEmpty($cachedRoutes);
-        static::assertCount(11, $cachedRoutes);
-
-        unlink($cacheFile);
-        putenv('APP_ENV=test');
+        static::assertNotEmpty($router->routes);
+        // Boot must have written the discovered table through the PSR-16 set() path.
+        static::assertTrue($cache->has('waffle.routes.discovered'));
+        static::assertSame($router->routes, $cache->get('waffle.routes.discovered'));
     }
 
-    public function testBootLoadsRoutesFromCacheInProduction(): void
+    public function testBootHydratesFromCacheAndSkipsDiscovery(): void
     {
-        putenv('APP_ENV=prod');
-        $cacheFile = APP_ROOT . '/var/cache/prod/' . 'waffle_routes_cache.php';
+        $expected = $this->provideRoutesArray();
+        $cache = $this->makeStubCache(seed: ['waffle.routes.discovered' => $expected]);
 
-        // FIX: Ensure the cache directory exists
-        $cacheDir = dirname($cacheFile);
-        if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
-        }
-        $routes = $this->provideRoutesArray();
-        $content = '<?php return ' . var_export($routes, true) . ';';
-        file_put_contents($cacheFile, $content, LOCK_EX);
+        // Directory points nowhere — proves discovery is not run when the cache is warm.
+        $router = new Router(directory: __DIR__ . '/NonExistentDirectory', cache: $cache);
+        $router->boot(container: $this->container);
 
-        $this->router->boot(container: $this->container);
-        static::assertFileExists($cacheFile);
-
-        $cachedRoutes = $this->router->routes;
-        static::assertSame($routes, $cachedRoutes);
-
-        unlink($cacheFile);
-        putenv('APP_ENV=test');
+        static::assertSame($expected, $router->routes);
     }
 
     public function testRouterHandlesNonExistentDirectoryGracefully(): void
@@ -184,6 +160,95 @@ final class RouterTest extends TestCase
         $badRouter->boot(container: $this->container);
 
         static::assertEmpty($badRouter->routes);
+    }
+
+    public function testGetRoutesReturnsTheDiscoveredRouteCollection(): void
+    {
+        $this->router->boot(container: $this->container);
+
+        $routes = $this->router->getRoutes();
+
+        static::assertNotEmpty($routes);
+        // Public getter must return the same collection as the asymmetric-visibility property.
+        static::assertSame($this->router->routes, $routes);
+    }
+
+    /**
+     * @param array<string, mixed> $seed
+     */
+    private function makeStubCache(array $seed = []): CacheInterface
+    {
+        return new class($seed) implements CacheInterface {
+            /** @var array<string, mixed> */
+            private array $store;
+
+            /** @param array<string, mixed> $seed */
+            public function __construct(array $seed)
+            {
+                $this->store = $seed;
+            }
+
+            #[\Override]
+            public function get(string $key, mixed $default = null): mixed
+            {
+                return $this->store[$key] ?? $default;
+            }
+
+            #[\Override]
+            public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
+            {
+                $this->store[$key] = $value;
+                return true;
+            }
+
+            #[\Override]
+            public function delete(string $key): bool
+            {
+                unset($this->store[$key]);
+                return true;
+            }
+
+            #[\Override]
+            public function clear(): bool
+            {
+                $this->store = [];
+                return true;
+            }
+
+            #[\Override]
+            public function getMultiple(iterable $keys, mixed $default = null): iterable
+            {
+                $out = [];
+                foreach ($keys as $k) {
+                    $out[$k] = $this->store[$k] ?? $default;
+                }
+                return $out;
+            }
+
+            #[\Override]
+            public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
+            {
+                foreach ($values as $k => $v) {
+                    $this->store[(string) $k] = $v;
+                }
+                return true;
+            }
+
+            #[\Override]
+            public function deleteMultiple(iterable $keys): bool
+            {
+                foreach ($keys as $k) {
+                    unset($this->store[$k]);
+                }
+                return true;
+            }
+
+            #[\Override]
+            public function has(string $key): bool
+            {
+                return array_key_exists($key, $this->store);
+            }
+        };
     }
 
     private function provideRoutesArray(): array

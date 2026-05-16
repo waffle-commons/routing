@@ -20,22 +20,16 @@ abstract class AbstractTestCase extends BaseTestCase
         foreach ($dirs as $dir) {
             $path = APP_ROOT . '/' . $dir;
             if (!is_dir($path)) {
-                mkdir($path, 0777, true);
+                mkdir($path, 0o777, true);
                 // Try to set permissions for Docker compatibility (if supported)
-                @chmod($path, 0777);
+                chmod($path, 0o777);
             }
         }
 
         parent::setUp();
     }
 
-    #[\Override]
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-    }
-
-    private function recursiveDelete(string $dir): void
+    private function _recursiveDelete(string $dir): void
     {
         if (!is_dir($dir)) {
             return;
