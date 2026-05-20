@@ -10,11 +10,9 @@ use Waffle\Commons\Contracts\Constant\Constant;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
 use Waffle\Commons\Routing\Trait\RequestTrait;
-use Waffle\Commons\Utils\Trait\ReflectionTrait;
 
 final class Router implements RouterInterface
 {
-    use ReflectionTrait;
     use RequestTrait;
 
     private const string CACHE_KEY = 'waffle.routes.discovered';

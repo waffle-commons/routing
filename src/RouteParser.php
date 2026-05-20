@@ -10,7 +10,7 @@ use ReflectionNamedType;
 use Waffle\Commons\Contracts\Constant\Constant;
 use Waffle\Commons\Routing\Attribute\Route;
 
-class RouteParser
+final readonly class RouteParser
 {
     /**
      * @param class-string $controllerClass

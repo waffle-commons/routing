@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Waffle\Commons\Routing;
 
 use Waffle\Commons\Contracts\Constant\Constant;
-use Waffle\Commons\Utils\Trait\ReflectionTrait;
+use Waffle\Commons\Utils\Service\ClassParser;
 
-class ControllerFinder
+final readonly class ControllerFinder
 {
-    use ReflectionTrait;
+    public function __construct(
+        private ClassParser $parser = new ClassParser(),
+    ) {}
 
     /**
      * Finds all potential controller class names in a given directory.
@@ -30,10 +32,11 @@ class ControllerFinder
      * Recursively scans a directory for PHP files.
      *
      * @param string $directory The directory to scan.
-     * @return array<array-key, string> A list of class names.
+     * @return list<string> A list of fully-qualified class names.
      */
     private function scan(string $directory): array
     {
+        /** @var list<string> $files */
         $files = [];
         $paths = scandir(directory: $directory);
 
@@ -55,14 +58,19 @@ class ControllerFinder
             $file = $directory . DIRECTORY_SEPARATOR . $path;
 
             if (is_dir(filename: $file)) {
-                $files = array_merge($files, $this->scan(directory: $file));
+                foreach ($this->scan(directory: $file) as $nested) {
+                    if (!is_string($nested)) {
+                        continue;
+                    }
+                    $files[] = $nested;
+                }
                 continue;
             }
 
-            if (str_contains($path, Constant::PHPEXT)) {
-                $className = $this->className(path: $file);
+            if (is_string($path) && str_contains($path, Constant::PHPEXT)) {
+                $className = $this->parser->className(path: $file);
                 // Only add if a valid class name was found
-                if ($className !== Constant::EMPTY_STRING) {
+                if ($className !== Constant::EMPTY_STRING && is_string($className)) {
                     $files[] = $className;
                 }
             }

@@ -6,7 +6,7 @@ namespace Waffle\Commons\Routing;
 
 use Waffle\Commons\Contracts\Container\ContainerInterface;
 
-class RouteDiscoverer
+final readonly class RouteDiscoverer
 {
     private RouteParser $parser;
 
