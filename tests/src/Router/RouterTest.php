@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
+use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Security\SecurityInterface;
 use Waffle\Commons\Routing\Router;
 use WaffleTests\Commons\Routing\AbstractTestCase as TestCase;
@@ -58,14 +59,14 @@ final class RouterTest extends TestCase
 
         $foundRoute = false;
         foreach ($this->router->routes as $route) {
-            if ('user_users_list' !== $route['name']) {
+            if ('user_users_list' !== $route->name) {
                 continue;
             }
 
             $foundRoute = true;
-            static::assertSame(TempController::class, $route['classname']);
-            static::assertSame('/users', $route['path']);
-            static::assertSame('list', $route['method']);
+            static::assertSame(TempController::class, $route->className);
+            static::assertSame('/users', $route->path);
+            static::assertSame('list', $route->method);
             break;
         }
         static::assertTrue($foundRoute);
@@ -85,7 +86,8 @@ final class RouterTest extends TestCase
         $matchingRoute = $this->router->matchRequest($requestMock);
 
         static::assertNotNull($matchingRoute);
-        static::assertSame('user_users_list', $matchingRoute['name']);
+        static::assertSame('user_users_list', $matchingRoute->name);
+        static::assertSame([], $matchingRoute->params, 'static routes hydrate with empty params');
     }
 
     #[DataProvider('dynamicRouteProvider')]
@@ -102,7 +104,7 @@ final class RouterTest extends TestCase
         $matchingRoute = $this->router->matchRequest($requestMock);
 
         static::assertNotNull($matchingRoute);
-        static::assertSame($expectedRouteName, $matchingRoute['name']);
+        static::assertSame($expectedRouteName, $matchingRoute->name);
     }
 
     public static function dynamicRouteProvider(): array
@@ -111,6 +113,22 @@ final class RouterTest extends TestCase
             'Single integer parameter' => ['/users/123', 'user_users_show'],
             'Multiple parameters (int and string)' => ['/users/42/john-doe-slug', 'user_users_details'],
         ];
+    }
+
+    public function testMatchHydratesParamsFromUri(): void
+    {
+        $this->router->boot(container: $this->container);
+
+        $uriStub = $this->createStub(UriInterface::class);
+        $uriStub->method('getPath')->willReturn('/users/42/john-doe-slug');
+
+        $requestMock = $this->createStub(ServerRequestInterface::class);
+        $requestMock->method('getUri')->willReturn($uriStub);
+
+        $matched = $this->router->matchRequest($requestMock);
+
+        static::assertNotNull($matched);
+        static::assertSame(['id' => '42', 'slug' => 'john-doe-slug'], $matched->params);
     }
 
     public function testNoMatchForNonExistentRoute(): void
@@ -143,7 +161,7 @@ final class RouterTest extends TestCase
 
     public function testBootHydratesFromCacheAndSkipsDiscovery(): void
     {
-        $expected = $this->provideRoutesArray();
+        $expected = $this->provideRoutesList();
         $cache = $this->makeStubCache(seed: ['waffle.routes.discovered' => $expected]);
 
         // Directory points nowhere — proves discovery is not run when the cache is warm.
@@ -151,6 +169,21 @@ final class RouterTest extends TestCase
         $router->boot(container: $this->container);
 
         static::assertSame($expected, $router->routes);
+    }
+
+    public function testBootRejectsLegacyArrayShapedCachePayloadAndRediscovers(): void
+    {
+        // A pre-DTO cache entry must NOT be used as-is — the router falls back to discovery.
+        $legacy = [
+            ['classname' => 'X', 'method' => 'y', 'arguments' => [], 'path' => '/x', 'name' => 'x'],
+        ];
+        $cache = $this->makeStubCache(seed: ['waffle.routes.discovered' => $legacy]);
+
+        $router = new Router(directory: 'tests/src/Helper/Controller', cache: $cache);
+        $router->boot(container: $this->container);
+
+        static::assertNotEmpty($router->routes);
+        static::assertContainsOnlyInstancesOf(MatchedRoute::class, $router->routes);
     }
 
     public function testRouterHandlesNonExistentDirectoryGracefully(): void
@@ -171,6 +204,7 @@ final class RouterTest extends TestCase
         static::assertNotEmpty($routes);
         // Public getter must return the same collection as the asymmetric-visibility property.
         static::assertSame($this->router->routes, $routes);
+        static::assertContainsOnlyInstancesOf(MatchedRoute::class, $routes);
     }
 
     /**
@@ -251,49 +285,47 @@ final class RouterTest extends TestCase
         };
     }
 
-    private function provideRoutesArray(): array
+    /**
+     * @return list<MatchedRoute>
+     */
+    private function provideRoutesList(): array
     {
         return [
-            [
-                'classname' => 'WaffleTests\Commons\Routing\Helper\Controller\TempController',
-                'method' => 'list',
-                'arguments' => [],
-                'path' => '/users',
-                'name' => 'user_users_list',
-            ],
-            [
-                'classname' => 'WaffleTests\Commons\Routing\Helper\Controller\TempController',
-                'method' => 'show',
-                'arguments' => [
-                    'id' => 'int',
-                ],
-                'path' => '/users/{id}',
-                'name' => 'user_users_show',
-            ],
-            [
-                'classname' => 'WaffleTests\Commons\Routing\Helper\Controller\TempController',
-                'method' => 'details',
-                'arguments' => [
-                    'id' => 'int',
-                    'slug' => 'string',
-                ],
-                'path' => '/users/{id}/{slug}',
-                'name' => 'user_users_details',
-            ],
-            [
-                'classname' => 'WaffleTests\Commons\Routing\Helper\Controller\TempController',
-                'method' => 'profile',
-                'arguments' => [],
-                'path' => '/users/profile/view',
-                'name' => 'user_users_profile_view',
-            ],
-            [
-                'classname' => 'WaffleTests\Commons\Routing\Helper\Controller\TempController',
-                'method' => 'throwError',
-                'arguments' => [],
-                'path' => '/trigger-error',
-                'name' => 'user_trigger_error',
-            ],
+            new MatchedRoute(
+                className: 'WaffleTests\\Commons\\Routing\\Helper\\Controller\\TempController',
+                method: 'list',
+                arguments: [],
+                path: '/users',
+                name: 'user_users_list',
+            ),
+            new MatchedRoute(
+                className: 'WaffleTests\\Commons\\Routing\\Helper\\Controller\\TempController',
+                method: 'show',
+                arguments: ['id' => 'int'],
+                path: '/users/{id}',
+                name: 'user_users_show',
+            ),
+            new MatchedRoute(
+                className: 'WaffleTests\\Commons\\Routing\\Helper\\Controller\\TempController',
+                method: 'details',
+                arguments: ['id' => 'int', 'slug' => 'string'],
+                path: '/users/{id}/{slug}',
+                name: 'user_users_details',
+            ),
+            new MatchedRoute(
+                className: 'WaffleTests\\Commons\\Routing\\Helper\\Controller\\TempController',
+                method: 'profile',
+                arguments: [],
+                path: '/users/profile/view',
+                name: 'user_users_profile_view',
+            ),
+            new MatchedRoute(
+                className: 'WaffleTests\\Commons\\Routing\\Helper\\Controller\\TempController',
+                method: 'throwError',
+                arguments: [],
+                path: '/trigger-error',
+                name: 'user_trigger_error',
+            ),
         ];
     }
 }

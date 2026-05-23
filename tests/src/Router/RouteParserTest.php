@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WaffleTests\Commons\Routing\Router;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Routing\RouteParser;
 use WaffleTests\Commons\Routing\AbstractTestCase as TestCase;
 use WaffleTests\Commons\Routing\Helper\Controller\AbstractUninstantiable;
@@ -43,7 +44,9 @@ final class RouteParserTest extends TestCase
         // DuplicateRouteController has 2 methods pointing to '/duplicate',
         // so only the first one should be registered.
         static::assertCount(1, $routes, 'Duplicate routes should be filtered out.');
-        static::assertSame('default_first_method', $routes[0]['name']);
+        $first = $routes[0] ?? null;
+        static::assertInstanceOf(MatchedRoute::class, $first);
+        static::assertSame('default_first_method', $first->name);
     }
 
     public function testParseReturnsEmptyIfClassHasNoRouteAttribute(): void
@@ -63,6 +66,7 @@ final class RouteParserTest extends TestCase
 
         static::assertCount(3, $routes);
 
+        // array_column works on arrays of objects via public properties since PHP 7.0.
         $paths = array_column($routes, 'path', 'name');
 
         // Expected: /base + /absolute -> /base/absolute
@@ -106,11 +110,14 @@ final class RouteParserTest extends TestCase
         // Only `show` carries a Route attribute; `notARoute` is intentionally skipped.
         static::assertCount(1, $routes);
 
-        $route = $routes[0];
+        // Narrow $routes[0] for the analyzer; PHPUnit's assertCount above already proves presence at runtime.
+        $route = $routes[0] ?? null;
+        static::assertInstanceOf(MatchedRoute::class, $route);
+
         // Class-level Route('/') trims to empty basePath; method path 'items/{id}' triggers the '/' + methodPath branch.
-        static::assertSame('/items/{id}', $route['path']);
+        static::assertSame('/items/{id}', $route->path);
         // ReflectionNamedType extraction populates the typed-parameter map.
-        static::assertSame(['id' => 'int'], $route['arguments']);
-        static::assertSame('root_item', $route['name']);
+        static::assertSame(['id' => 'int'], $route->arguments);
+        static::assertSame('root_item', $route->name);
     }
 }

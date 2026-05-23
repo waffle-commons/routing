@@ -6,8 +6,8 @@ namespace Waffle\Commons\Routing;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Waffle\Commons\Contracts\Cache\CacheInterface;
-use Waffle\Commons\Contracts\Constant\Constant;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
+use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
 use Waffle\Commons\Routing\Trait\RequestTrait;
 
@@ -29,13 +29,7 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @var array<array-key, array{
-     *      classname: class-string,
-     *      method: string,
-     *      arguments: array<string, mixed>,
-     *      path: string,
-     *      name: non-falsy-string
-     * }>
+     * @var list<MatchedRoute>
      */
     public array $routes {
         set => $this->routes = $value;
@@ -58,16 +52,7 @@ final class Router implements RouterInterface
     {
         if ($this->cache !== null) {
             $cachedRoutes = $this->cache->get(self::CACHE_KEY);
-            if (is_array($cachedRoutes)) {
-                /**
-                 * @var array<array-key, array{
-                 *      classname: class-string,
-                 *      method: string,
-                 *      arguments: array<string, mixed>,
-                 *      path: string,
-                 *      name: non-falsy-string
-                 *  }> $cachedRoutes
-                 */
+            if (is_array($cachedRoutes) && $this->isMatchedRouteList($cachedRoutes)) {
                 $this->routes = $cachedRoutes;
 
                 return $this;
@@ -80,26 +65,13 @@ final class Router implements RouterInterface
         return $this;
     }
 
-    /**
-     * Matches the current request against registered routes.
-     *
-     * @param ServerRequestInterface $request
-     * @return array{
-     *        classname: class-string,
-     *        method: string,
-     *        arguments: array<string, mixed>,
-     *        path: string,
-     *        name: non-falsy-string
-     *   }|null Returns the route array if matched, null otherwise.
-     */
     #[\Override]
-    public function matchRequest(ServerRequestInterface $request): ?array
+    public function matchRequest(ServerRequestInterface $request): ?MatchedRoute
     {
         foreach ($this->routes as $route) {
             $params = $this->match($request, $route);
             if ($params !== false) {
-                $route['params'] = $params;
-                return $route;
+                return $route->withParams($params);
             }
         }
 
@@ -109,21 +81,13 @@ final class Router implements RouterInterface
     /**
      * Internal match logic.
      *
-     * @param ServerRequestInterface $req
-     * @param array{
-     *        classname: class-string,
-     *        method: string,
-     *        arguments: array<string, mixed>,
-     *        path: string,
-     *        name: non-falsy-string
-     *   } $route
      * @return array<string, mixed>|false Returns params array if matched, false otherwise.
      */
-    private function match(ServerRequestInterface $req, array $route): array|false
+    private function match(ServerRequestInterface $req, MatchedRoute $route): array|false
     {
         // PSR-7 URI Handling
         $uriPath = $req->getUri()->getPath();
-        $pathSegments = $this->getPathUri($route[Constant::PATH]);
+        $pathSegments = $this->getPathUri($route->path);
         $urlSegments = $this->getPathUri($uriPath);
 
         if (count($pathSegments) !== count($urlSegments)) {
@@ -149,17 +113,29 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @return array<array-key, array{
-     *       classname: class-string,
-     *       method: string,
-     *       arguments: array<string, mixed>,
-     *       path: string,
-     *       name: non-falsy-string
-     *  }>
+     * @return list<MatchedRoute>
      */
     #[\Override]
     public function getRoutes(): array
     {
         return $this->routes;
+    }
+
+    /**
+     * Narrows a freshly-thawed cache payload to the strict `list<MatchedRoute>` shape
+     * the property requires. Stale or hand-rolled cache entries (e.g., legacy arrays
+     * surviving a deploy) are rejected so the router re-discovers from source.
+     *
+     * @param array<array-key, mixed> $candidate
+     * @phpstan-assert-if-true list<MatchedRoute> $candidate
+     */
+    private function isMatchedRouteList(array $candidate): bool
+    {
+        foreach ($candidate as $entry) {
+            if (!$entry instanceof MatchedRoute) {
+                return false;
+            }
+        }
+        return true;
     }
 }
