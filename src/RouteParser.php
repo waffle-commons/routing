@@ -86,12 +86,19 @@ final readonly class RouteParser
             return null;
         }
 
+        // Method-level priority always wins. The class-level value is the default for
+        // methods that don't override it (consistent with how `path` concatenation
+        // already inherits from the class-level Route). Defaults to 0 when neither
+        // declares it explicitly.
+        $priority = $route->priority !== 0 ? $route->priority : $classRoute->priority;
+
         return new MatchedRoute(
             className: $file,
             method: $method->getName(),
             arguments: $this->extractParameters($method),
             path: $path,
             name: ($classRoute->name ?? 'default') . '_' . ($route->name ?? 'default'),
+            priority: $priority,
         );
     }
 

@@ -53,13 +53,20 @@ final class Router implements RouterInterface
         if ($this->cache !== null) {
             $cachedRoutes = $this->cache->get(self::CACHE_KEY);
             if (is_array($cachedRoutes) && $this->isMatchedRouteList($cachedRoutes)) {
+                // The cached payload is already sorted by priority at write time —
+                // hydrate it verbatim instead of paying for a redundant sort.
                 $this->routes = $cachedRoutes;
 
                 return $this;
             }
         }
 
-        $this->routes = $this->discoverer->discover($container);
+        $discovered = $this->discoverer->discover($container);
+        // Catch-all routes (priority: -1000, etc.) sit at the tail; high-priority
+        // routes are evaluated first. usort() is stable enough on PHP 8.5 to keep
+        // declaration order within a single priority bucket.
+        usort($discovered, static fn(MatchedRoute $a, MatchedRoute $b): int => $b->priority <=> $a->priority);
+        $this->routes = $discovered;
         $this->cache?->set(self::CACHE_KEY, $this->routes);
 
         return $this;

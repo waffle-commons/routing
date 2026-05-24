@@ -70,7 +70,8 @@ final class RouteDiscovererTest extends TestCase
         // PathConcatenationController has 3 routes.
         // ComplexParametersController has 2 routes.
         // TypedRootController has 1 route (the no-Route method is skipped).
-        // Total should be 12.
-        static::assertCount(12, $routes);
+        // CatchAllController has 1 route (sorted to the tail by priority: -1000).
+        // Total should be 13.
+        static::assertCount(13, $routes);
     }
 }

@@ -15,6 +15,7 @@ use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Security\SecurityInterface;
 use Waffle\Commons\Routing\Router;
 use WaffleTests\Commons\Routing\AbstractTestCase as TestCase;
+use WaffleTests\Commons\Routing\Helper\Controller\CatchAllController;
 use WaffleTests\Commons\Routing\Helper\Controller\TempController;
 use WaffleTests\Commons\Routing\Helper\MockContainer;
 
@@ -38,6 +39,7 @@ final class RouterTest extends TestCase
         $this->container = $innerContainer;
         $this->container->set(SecurityInterface::class, $security);
         $this->container->set(TempController::class, new TempController());
+        $this->container->set(CatchAllController::class, new CatchAllController());
 
         $this->router = new Router(directory: 'tests/src/Helper/Controller');
     }
@@ -55,7 +57,7 @@ final class RouterTest extends TestCase
         $this->router->boot(container: $this->container);
 
         static::assertNotEmpty($this->router->routes);
-        static::assertCount(12, $this->router->routes);
+        static::assertCount(13, $this->router->routes);
 
         $foundRoute = false;
         foreach ($this->router->routes as $route) {
@@ -135,8 +137,10 @@ final class RouterTest extends TestCase
     {
         $this->router->boot(container: $this->container);
 
+        // Multi-segment URL — every fixture route (including the single-segment
+        // catch-all in CatchAllController) has fewer segments, so this must miss.
         $uriStub = $this->createStub(UriInterface::class);
-        $uriStub->method('getPath')->willReturn('/non-existent-route');
+        $uriStub->method('getPath')->willReturn('/no/match/here');
 
         $requestMock = $this->createStub(ServerRequestInterface::class);
         $requestMock->method('getUri')->willReturn($uriStub);
@@ -193,6 +197,75 @@ final class RouterTest extends TestCase
         $badRouter->boot(container: $this->container);
 
         static::assertEmpty($badRouter->routes);
+    }
+
+    public function testRoutesAreSortedByDescendingPriority(): void
+    {
+        $this->router->boot(container: $this->container);
+
+        // Copy the route list into a local variable first — `$router->routes` is
+        // backed by a property hook that rejects indirect modification (and end()
+        // mutates the internal array pointer).
+        $routes = $this->router->routes;
+
+        // The catch-all route declared by CatchAllController (priority: -1000) MUST
+        // sit at the tail of the compiled table — every other discovered route uses
+        // the default priority of 0 and therefore sorts ahead of it.
+        $priorities = array_map(static fn(MatchedRoute $r): int => $r->priority, $routes);
+        $sorted = $priorities;
+        rsort($sorted);
+        static::assertSame($sorted, $priorities, 'routes must be ordered by descending priority');
+
+        $last = end($routes);
+        static::assertInstanceOf(MatchedRoute::class, $last);
+        static::assertSame(-1000, $last->priority);
+        static::assertSame('catchall_fallback', $last->name);
+    }
+
+    public function testCatchAllRouteMatchesOnlyWhenNoHigherPriorityRouteClaimsTheUri(): void
+    {
+        $this->router->boot(container: $this->container);
+
+        // /users matches the priority-0 TempController::list — NOT the catch-all.
+        $uriStub = $this->createStub(UriInterface::class);
+        $uriStub->method('getPath')->willReturn('/users');
+        $requestMock = $this->createStub(ServerRequestInterface::class);
+        $requestMock->method('getUri')->willReturn($uriStub);
+
+        $matched = $this->router->matchRequest($requestMock);
+        static::assertNotNull($matched);
+        static::assertSame('user_users_list', $matched->name);
+
+        // /something-unmatched falls through every priority-0 route and lands on
+        // the priority-(-1000) catch-all.
+        $uriStub2 = $this->createStub(UriInterface::class);
+        $uriStub2->method('getPath')->willReturn('/something-unmatched');
+        $requestMock2 = $this->createStub(ServerRequestInterface::class);
+        $requestMock2->method('getUri')->willReturn($uriStub2);
+
+        $catchAll = $this->router->matchRequest($requestMock2);
+        static::assertNotNull($catchAll);
+        static::assertSame('catchall_fallback', $catchAll->name);
+        static::assertSame(-1000, $catchAll->priority);
+        static::assertSame(['anything' => 'something-unmatched'], $catchAll->params);
+    }
+
+    public function testCachedRoutePayloadPreservesPrioritySortOrder(): void
+    {
+        // First boot: discovery + sort + cache write.
+        $cache = $this->makeStubCache();
+        $router = new Router(directory: 'tests/src/Helper/Controller', cache: $cache);
+        $router->boot(container: $this->container);
+
+        $writtenPriorities = array_map(static fn(MatchedRoute $r): int => $r->priority, $router->routes);
+
+        // Second boot: cache hit short-circuits discovery; verify the rehydrated
+        // collection is byte-for-byte identical (i.e. sorting was preserved).
+        $router2 = new Router(directory: __DIR__ . '/NonExistentDirectory', cache: $cache);
+        $router2->boot(container: $this->container);
+
+        $hydratedPriorities = array_map(static fn(MatchedRoute $r): int => $r->priority, $router2->routes);
+        static::assertSame($writtenPriorities, $hydratedPriorities);
     }
 
     public function testGetRoutesReturnsTheDiscoveredRouteCollection(): void

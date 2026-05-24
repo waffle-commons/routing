@@ -101,6 +101,21 @@ final class RouteParserTest extends TestCase
         static::assertEmpty($args['default_union']);
     }
 
+    public function testParsePropagatesPriorityFromAttributeToMatchedRoute(): void
+    {
+        $parser = new RouteParser();
+
+        $routes = $parser->parse(\WaffleTests\Commons\Routing\Helper\Controller\CatchAllController::class);
+
+        static::assertCount(1, $routes);
+        $route = $routes[0] ?? null;
+        static::assertInstanceOf(MatchedRoute::class, $route);
+        // CatchAllController has class-level `priority: -1000`; the method-level
+        // Route does not redeclare it, so the inherited class value wins.
+        static::assertSame(-1000, $route->priority);
+        static::assertSame('catchall_fallback', $route->name);
+    }
+
     public function testParseHandlesEmptyBasePathAndTypedParameter(): void
     {
         $parser = new RouteParser();
