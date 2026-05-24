@@ -280,6 +280,95 @@ final class RouterTest extends TestCase
         static::assertContainsOnlyInstancesOf(MatchedRoute::class, $routes);
     }
 
+    public function testCatchAllRouteMatchesAcrossMultipleSegments(): void
+    {
+        // Beta-1 gateway requirement: a `/{path:.*}` fallback must match ANY
+        // depth of path so unmatched traffic can be proxied to the legacy backend.
+        $routes = [
+            new MatchedRoute(
+                className: TempController::class,
+                method: 'health',
+                arguments: [],
+                path: '/api/health',
+                name: 'api_health',
+                priority: 10,
+            ),
+            new MatchedRoute(
+                className: CatchAllController::class,
+                method: 'proxy',
+                arguments: [],
+                path: '/{path:.*}',
+                name: 'gateway_proxy',
+                priority: -1000,
+            ),
+        ];
+        $cache = $this->makeStubCache(seed: ['waffle.routes.discovered' => $routes]);
+        $router = new Router(directory: __DIR__ . '/NonExistentDirectory', cache: $cache);
+        $router->boot(container: $this->container);
+
+        // The specific high-priority route still wins on its exact path.
+        static::assertSame('api_health', $this->matchPath($router, '/api/health')?->name);
+
+        // Everything else falls through to the multi-segment catch-all.
+        $matched = $this->matchPath($router, '/legacy/orders/42/items');
+        static::assertNotNull($matched);
+        static::assertSame('gateway_proxy', $matched->name);
+        static::assertSame(['path' => 'legacy/orders/42/items'], $matched->params);
+    }
+
+    public function testConstrainedParameterRejectsNonMatchingValues(): void
+    {
+        $routes = [
+            new MatchedRoute(
+                className: TempController::class,
+                method: 'file',
+                arguments: [],
+                path: '/files/{id:\d+}',
+                name: 'files_show',
+            ),
+        ];
+        $cache = $this->makeStubCache(seed: ['waffle.routes.discovered' => $routes]);
+        $router = new Router(directory: __DIR__ . '/NonExistentDirectory', cache: $cache);
+        $router->boot(container: $this->container);
+
+        $matched = $this->matchPath($router, '/files/123');
+        static::assertNotNull($matched);
+        static::assertSame(['id' => '123'], $matched->params);
+
+        // A non-numeric id must not satisfy the `\d+` constraint.
+        static::assertNull($this->matchPath($router, '/files/abc'));
+    }
+
+    public function testStaticSegmentDotsAreMatchedLiterally(): void
+    {
+        $routes = [
+            new MatchedRoute(
+                className: TempController::class,
+                method: 'manifest',
+                arguments: [],
+                path: '/health.json',
+                name: 'health_json',
+            ),
+        ];
+        $cache = $this->makeStubCache(seed: ['waffle.routes.discovered' => $routes]);
+        $router = new Router(directory: __DIR__ . '/NonExistentDirectory', cache: $cache);
+        $router->boot(container: $this->container);
+
+        static::assertSame('health_json', $this->matchPath($router, '/health.json')?->name);
+        // The '.' must be a literal, not a regex wildcard.
+        static::assertNull($this->matchPath($router, '/healthXjson'));
+    }
+
+    private function matchPath(Router $router, string $path): ?MatchedRoute
+    {
+        $uri = $this->createStub(UriInterface::class);
+        $uri->method('getPath')->willReturn($path);
+        $request = $this->createStub(ServerRequestInterface::class);
+        $request->method('getUri')->willReturn($uri);
+
+        return $router->matchRequest($request);
+    }
+
     /**
      * @param array<string, mixed> $seed
      */

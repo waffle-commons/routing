@@ -9,12 +9,9 @@ use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
-use Waffle\Commons\Routing\Trait\RequestTrait;
 
 final class Router implements RouterInterface
 {
-    use RequestTrait;
-
     private const string CACHE_KEY = 'waffle.routes.discovered';
 
     private(set) string|false $directory {
@@ -36,6 +33,9 @@ final class Router implements RouterInterface
     }
 
     private readonly RouteDiscoverer $discoverer;
+
+    /** @var array<string, array{0: non-empty-string, 1: list<string>}> Compiled PCRE keyed by route path (compile-once cache). */
+    private array $compiledPatterns = [];
 
     public function __construct(
         string|false $directory,
@@ -86,37 +86,73 @@ final class Router implements RouterInterface
     }
 
     /**
-     * Internal match logic.
+     * Internal match logic. Compiles each route path to a PCRE (memoised) and
+     * matches it against the full request path, so multi-segment catch-all
+     * routes (e.g. `/{path:.*}`) match alongside single-segment parameters.
      *
      * @return array<string, mixed>|false Returns params array if matched, false otherwise.
      */
     private function match(ServerRequestInterface $req, MatchedRoute $route): array|false
     {
-        // PSR-7 URI Handling
         $uriPath = $req->getUri()->getPath();
-        $pathSegments = $this->getPathUri($route->path);
-        $urlSegments = $this->getPathUri($uriPath);
+        [$pattern, $names] = $this->compiledPatterns[$route->path] ??= $this->compilePattern($route->path);
 
-        if (count($pathSegments) !== count($urlSegments)) {
+        $matches = [];
+        if (preg_match($pattern, $uriPath, $matches) !== 1) {
             return false;
         }
 
         $params = [];
-
-        foreach ($pathSegments as $i => $pathSegment) {
-            if (str_starts_with($pathSegment, '{') && str_ends_with($pathSegment, '}')) {
-                // This is a dynamic parameter
-                $paramName = trim($pathSegment, '{}');
-                $params[$paramName] = $urlSegments[$i];
-                continue;
-            }
-
-            if ($pathSegment !== $urlSegments[$i]) {
-                return false;
-            }
+        foreach ($names as $name) {
+            $params[$name] = $matches[$name] ?? '';
         }
 
         return $params;
+    }
+
+    /**
+     * Compiles a route path into a PCRE with named capture groups:
+     *
+     *   /users/{id}      → #^/users/(?P<id>[^/]+)$#     single segment (default)
+     *   /files/{id:\d+}  → #^/files/(?P<id>\d+)$#        custom constraint
+     *   /{path:.*}       → #^/(?P<path>.*)$#             spans '/', catch-all
+     *
+     * Static text is `preg_quote`d so literal dots/dashes stay literal. A
+     * placeholder constraint containing a literal `}` is unsupported (rare).
+     *
+     * @return array{0: non-empty-string, 1: list<string>} [pattern, capture names]
+     */
+    private function compilePattern(string $path): array
+    {
+        $names = [];
+        $regex = '';
+
+        $tokens = preg_split('/(\{[a-zA-Z_]\w*(?::[^}]+)?\})/', $path, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($tokens === false) {
+            return ['#^' . preg_quote($path, '#') . '$#', []];
+        }
+
+        foreach ($tokens as $token) {
+            if ($token === '') {
+                continue;
+            }
+
+            $parts = [];
+            if (preg_match('/^\{([a-zA-Z_]\w*)(?::([^}]+))?\}$/', $token, $parts) === 1) {
+                $name = $parts[1] ?? '';
+                $names[] = $name;
+                $constraint = $parts[2] ?? '';
+                if ($constraint === '') {
+                    $constraint = '[^/]+';
+                }
+                $regex .= '(?P<' . $name . '>' . $constraint . ')';
+                continue;
+            }
+
+            $regex .= preg_quote($token, '#');
+        }
+
+        return ['#^' . $regex . '$#', $names];
     }
 
     /**
