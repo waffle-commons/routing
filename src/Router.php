@@ -95,7 +95,7 @@ final class Router implements RouterInterface
     private function match(ServerRequestInterface $req, MatchedRoute $route): array|false
     {
         $uriPath = $req->getUri()->getPath();
-        [$pattern, $names] = $this->compiledPatterns[$route->path] ??= $this->compilePattern($route->path);
+        [$pattern, $names] = $this->compiledPatterns[$route->path] ?? $this->compilePattern($route->path);
 
         $matches = [];
         if (preg_match($pattern, $uriPath, $matches) !== 1) {
