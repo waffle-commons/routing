@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Waffle\Commons\Routing;
 
 use Waffle\Commons\Contracts\Container\ContainerInterface;
+use Waffle\Commons\Contracts\Routing\MatchedRoute;
 
-class RouteDiscoverer
+final readonly class RouteDiscoverer
 {
     private RouteParser $parser;
 
@@ -22,13 +23,7 @@ class RouteDiscoverer
     }
 
     /**
-     * @return array<array-key, array{
-     *      classname: class-string,
-     *      method: string,
-     *      arguments: array<string, mixed>,
-     *      path: string,
-     *      name: non-falsy-string
-     *  }>
+     * @return list<MatchedRoute>
      */
     public function discover(ContainerInterface $_container): array
     {

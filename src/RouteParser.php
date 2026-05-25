@@ -7,20 +7,14 @@ namespace Waffle\Commons\Routing;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
-use Waffle\Commons\Contracts\Constant\Constant;
+use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Routing\Attribute\Route;
 
-class RouteParser
+final readonly class RouteParser
 {
     /**
      * @param class-string $controllerClass
-     * @return array<array-key, array{
-     * classname: class-string,
-     * method: string,
-     * arguments: array<string, mixed>,
-     * path: string,
-     * name: non-falsy-string
-     * }>
+     * @return list<MatchedRoute>
      */
     public function parse(string $controllerClass): array
     {
@@ -49,7 +43,7 @@ class RouteParser
         $routes = [];
         foreach ($reflection->getMethods() as $method) {
             $newRoute = $this->createRoute($controllerClass, $classRoute, $method, $routes);
-            if ($newRoute) {
+            if ($newRoute !== null) {
                 $routes[] = $newRoute;
             }
         }
@@ -58,24 +52,15 @@ class RouteParser
     }
 
     /**
-     * @param class-string $file
-     * @param array<array-key, array{
-     * classname: class-string,
-     * method: string,
-     * arguments: array<string, mixed>,
-     * path: string,
-     * name: non-falsy-string
-     * }> $routes
-     * @return array{
-     * classname: class-string,
-     * method: string,
-     * arguments: array<string, mixed>,
-     * path: string,
-     * name: non-falsy-string
-     * }|null
+     * @param class-string       $file
+     * @param list<MatchedRoute> $routes
      */
-    private function createRoute(string $file, Route $classRoute, ReflectionMethod $method, array $routes): ?array
-    {
+    private function createRoute(
+        string $file,
+        Route $classRoute,
+        ReflectionMethod $method,
+        array $routes,
+    ): ?MatchedRoute {
         $attributes = $method->getAttributes(Route::class);
         if ($attributes === []) {
             return null;
@@ -97,17 +82,24 @@ class RouteParser
         }
         // --- End Improved Path Concatenation ---
 
-        if (!$this->isRouteRegistered($path, $routes)) {
-            return [
-                Constant::CLASSNAME => $file,
-                Constant::METHOD => $method->getName(),
-                Constant::ARGUMENTS => $this->extractParameters($method),
-                Constant::PATH => $path, // Use the cleaned path
-                Constant::NAME => ($classRoute->name ?? 'default') . '_' . ($route->name ?? 'default'),
-            ];
+        if ($this->isRouteRegistered($path, $routes)) {
+            return null;
         }
 
-        return null;
+        // Method-level priority always wins. The class-level value is the default for
+        // methods that don't override it (consistent with how `path` concatenation
+        // already inherits from the class-level Route). Defaults to 0 when neither
+        // declares it explicitly.
+        $priority = $route->priority !== 0 ? $route->priority : $classRoute->priority;
+
+        return new MatchedRoute(
+            className: $file,
+            method: $method->getName(),
+            arguments: $this->extractParameters($method),
+            path: $path,
+            name: ($classRoute->name ?? 'default') . '_' . ($route->name ?? 'default'),
+            priority: $priority,
+        );
     }
 
     /**
@@ -128,24 +120,14 @@ class RouteParser
     }
 
     /**
-     * @param string $path
-     * @param array<array-key, array{
-     * classname: class-string,
-     * method: string,
-     * arguments: array<string, mixed>,
-     * path: string,
-     * name: non-falsy-string
-     * }> $routes
-     * @return bool
+     * @param list<MatchedRoute> $routes
      */
     private function isRouteRegistered(string $path, array $routes): bool
     {
         foreach ($routes as $route) {
-            if ($route[Constant::PATH] !== $path) {
-                continue;
+            if ($route->path === $path) {
+                return true;
             }
-
-            return true;
         }
         return false;
     }

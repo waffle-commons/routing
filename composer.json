@@ -1,6 +1,5 @@
 {
     "name": "waffle-commons/routing",
-    "version": "0.1.0-beta0",
     "description": "Routing component for Waffle framework.",
     "type": "library",
     "license": "MIT",
