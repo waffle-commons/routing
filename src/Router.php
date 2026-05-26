@@ -7,6 +7,7 @@ namespace Waffle\Commons\Routing;
 use Psr\Http\Message\ServerRequestInterface;
 use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
+use Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedException;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
 
@@ -75,14 +76,54 @@ final class Router implements RouterInterface
     #[\Override]
     public function matchRequest(ServerRequestInterface $request): ?MatchedRoute
     {
+        // List of routes that match the path but not the requested HTTP method
+        /** @var list<MatchedRoute> $methodMismatchedRoutes */
+        $methodMismatchedRoutes = [];
+        $pathMatched = false;
+
+        $rawMethod = $request->getMethod();
+        $requestMethod = $rawMethod === '' ? 'GET' : strtoupper($rawMethod);
+
         foreach ($this->routes as $route) {
             $params = $this->match($request, $route);
             if ($params !== false) {
-                return $route->withParams($params);
+                $pathMatched = true;
+
+                // If the route accepts all methods (empty array), or if the method matches (case-insensitive)
+                $allowedMethods = array_map('strtoupper', $route->methods);
+                $methodMatches = $allowedMethods === [] || in_array($requestMethod, $allowedMethods, true);
+
+                if ($methodMatches) {
+                    // Exact match on path and HTTP method (first one wins)
+                    return $route->withParams($params);
+                }
+
+                // Path matches but method does not, keep track to throw 405 if needed
+                $methodMismatchedRoutes[] = $route;
             }
         }
 
-        return null;
+        if (!$pathMatched) {
+            // No path matches: return null as per RouterInterface contract
+            return null;
+        }
+
+        // Path matches but HTTP method does not: HTTP 405 Method Not Allowed
+        $allAllowedMethods = [];
+        foreach ($methodMismatchedRoutes as $route) {
+            foreach ($route->methods as $m) {
+                $allAllowedMethods[] = strtoupper($m);
+            }
+        }
+        $uniqueAllowedMethods = array_values(array_unique($allAllowedMethods));
+
+        $message = sprintf(
+            'The requested HTTP method %s is not allowed for this route. Allowed methods: %s.',
+            $rawMethod === '' ? 'GET' : $rawMethod,
+            implode(', ', $uniqueAllowedMethods),
+        );
+
+        throw new MethodNotAllowedException($uniqueAllowedMethods, $message);
     }
 
     /**

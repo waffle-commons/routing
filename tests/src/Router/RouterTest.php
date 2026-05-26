@@ -490,4 +490,76 @@ final class RouterTest extends TestCase
             ),
         ];
     }
+
+    public function testMatchRequestWithHttpMethodFilteringAndOverloading(): void
+    {
+        // Configure routes with different methods on the same path (overloading)
+        $routeGet = new MatchedRoute(
+            className: 'App\\Controller\\TestController',
+            method: 'get',
+            arguments: [],
+            path: '/items',
+            name: 'items_get',
+            priority: 0,
+            methods: ['GET'],
+        );
+        $routePost = new MatchedRoute(
+            className: 'App\\Controller\\TestController',
+            method: 'post',
+            arguments: [],
+            path: '/items',
+            name: 'items_post',
+            priority: 0,
+            methods: ['POST'],
+        );
+
+        $this->router->routes = [$routeGet, $routePost];
+
+        // 1. Exact match on GET
+        $uriGet = $this->createStub(UriInterface::class);
+        $uriGet->method('getPath')->willReturn('/items');
+        $requestGet = $this->createStub(ServerRequestInterface::class);
+        $requestGet->method('getUri')->willReturn($uriGet);
+        $requestGet->method('getMethod')->willReturn('GET');
+
+        $match = $this->router->matchRequest($requestGet);
+        static::assertNotNull($match);
+        static::assertSame('items_get', $match->name);
+
+        // 2. Exact match on POST (case-insensitive to the requested HTTP method)
+        $requestPost = $this->createStub(ServerRequestInterface::class);
+        $requestPost->method('getUri')->willReturn($uriGet);
+        $requestPost->method('getMethod')->willReturn('post');
+
+        $match2 = $this->router->matchRequest($requestPost);
+        static::assertNotNull($match2);
+        static::assertSame('items_post', $match2->name);
+
+        // 3. Method not allowed (PUT) -> MethodNotAllowedException
+        $requestPut = $this->createStub(ServerRequestInterface::class);
+        $requestPut->method('getUri')->willReturn($uriGet);
+        $requestPut->method('getMethod')->willReturn('PUT');
+
+        try {
+            $this->router->matchRequest($requestPut);
+            static::fail('MethodNotAllowedException should have been thrown.');
+        } catch (\Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedExceptionInterface $e) {
+            static::assertSame(['GET', 'POST'], $e->getAllowedMethods());
+            static::assertSame(405, $e->getCode());
+            // Verify English error message
+            static::assertStringContainsString(
+                'The requested HTTP method PUT is not allowed for this route.',
+                $e->getMessage(),
+            );
+        }
+
+        // 4. Path not found -> returns null conforming to RouterInterface contract
+        $uriNotFound = $this->createStub(UriInterface::class);
+        $uriNotFound->method('getPath')->willReturn('/not-found-items');
+        $requestNotFound = $this->createStub(ServerRequestInterface::class);
+        $requestNotFound->method('getUri')->willReturn($uriNotFound);
+        $requestNotFound->method('getMethod')->willReturn('GET');
+
+        static::assertNull($this->router->matchRequest($requestNotFound));
+    }
 }

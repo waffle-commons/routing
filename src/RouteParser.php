@@ -7,8 +7,8 @@ namespace Waffle\Commons\Routing;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
+use Waffle\Commons\Contracts\Routing\Attribute\Route;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
-use Waffle\Commons\Routing\Attribute\Route;
 
 final readonly class RouteParser
 {
@@ -55,6 +55,14 @@ final readonly class RouteParser
      * @param class-string       $file
      * @param list<MatchedRoute> $routes
      */
+    /**
+     * Creates a matching route from the reflection of a controller method.
+     *
+     * @param class-string $file
+     * @param Route $classRoute
+     * @param ReflectionMethod $method
+     * @param list<MatchedRoute> $routes
+     */
     private function createRoute(
         string $file,
         Route $classRoute,
@@ -82,7 +90,11 @@ final readonly class RouteParser
         }
         // --- End Improved Path Concatenation ---
 
-        if ($this->isRouteRegistered($path, $routes)) {
+        // Extract the allowed HTTP methods for this route
+        $methods = $route->methods;
+
+        // Validate duplicates, taking into account overloaded HTTP methods
+        if ($this->isRouteRegistered($path, $methods, $routes)) {
             return null;
         }
 
@@ -99,6 +111,7 @@ final readonly class RouteParser
             path: $path,
             name: ($classRoute->name ?? 'default') . '_' . ($route->name ?? 'default'),
             priority: $priority,
+            methods: $methods,
         );
     }
 
@@ -120,12 +133,28 @@ final readonly class RouteParser
     }
 
     /**
-     * @param list<MatchedRoute> $routes
+     * Checks if a route with the same path and overlapping HTTP methods is already registered.
+     *
+     * @param string $path The route path.
+     * @param array<string> $methods HTTP methods of the route currently being parsed.
+     * @param list<MatchedRoute> $routes List of already registered routes.
      */
-    private function isRouteRegistered(string $path, array $routes): bool
+    private function isRouteRegistered(string $path, array $methods, array $routes): bool
     {
         foreach ($routes as $route) {
-            if ($route->path === $path) {
+            if ($route->path !== $path) {
+                continue;
+            }
+
+            // If either accepts all methods (empty array), it is a duplicate conflict
+            if ($route->methods === [] || $methods === []) {
+                return true;
+            }
+
+            // If there is an intersection between allowed methods, it is a duplicate
+            $intersect = array_intersect(array_map('strtoupper', $route->methods), array_map('strtoupper', $methods));
+
+            if ($intersect !== []) {
                 return true;
             }
         }

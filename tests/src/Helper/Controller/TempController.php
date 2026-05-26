@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WaffleTests\Commons\Routing\Helper\Controller;
 
 use Exception;
-use Waffle\Commons\Routing\Attribute\Route;
+use Waffle\Commons\Contracts\Routing\Attribute\Route;
 
 /**
  * This is a fake controller used exclusively for testing purposes.
