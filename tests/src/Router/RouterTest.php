@@ -544,7 +544,9 @@ final class RouterTest extends TestCase
             $this->router->matchRequest($requestPut);
             static::fail('MethodNotAllowedException should have been thrown.');
         } catch (\Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedExceptionInterface $e) {
-            static::assertSame(['GET', 'POST'], $e->getAllowedMethods());
+            // The declared methods (GET, POST) are augmented with the verbs the framework
+            // auto-serves — HEAD (implied by GET) and OPTIONS — then sorted alphabetically.
+            static::assertSame(['GET', 'HEAD', 'OPTIONS', 'POST'], $e->getAllowedMethods());
             static::assertSame(405, $e->getCode());
             // Verify English error message
             static::assertStringContainsString(
@@ -561,5 +563,106 @@ final class RouterTest extends TestCase
         $requestNotFound->method('getMethod')->willReturn('GET');
 
         static::assertNull($this->router->matchRequest($requestNotFound));
+    }
+
+    public function testHeadRequestMatchesGetRoute(): void
+    {
+        // RFC 7231 §4.3.2: a resource that serves GET also serves HEAD.
+        $this->router->routes = [
+            new MatchedRoute(
+                className: 'App\\Controller\\TestController',
+                method: 'get',
+                arguments: [],
+                path: '/items',
+                name: 'items_get',
+                methods: ['GET'],
+            ),
+        ];
+
+        $match = $this->matchWithMethod('/items', 'HEAD');
+
+        static::assertNotNull($match);
+        static::assertSame('items_get', $match->name);
+    }
+
+    public function testHeadRequestDoesNotMatchPostOnlyRoute(): void
+    {
+        $this->router->routes = [
+            new MatchedRoute(
+                className: 'App\\Controller\\TestController',
+                method: 'create',
+                arguments: [],
+                path: '/items',
+                name: 'items_create',
+                methods: ['POST'],
+            ),
+        ];
+
+        try {
+            $this->matchWithMethod('/items', 'HEAD');
+            static::fail('MethodNotAllowedException expected for HEAD on a POST-only route.');
+        } catch (\Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedExceptionInterface $e) {
+            // No GET on this path, so HEAD is not implied; OPTIONS is always advertised.
+            static::assertSame(['OPTIONS', 'POST'], $e->getAllowedMethods());
+        }
+    }
+
+    public function testMethodNotAllowedListIsMergedDedupedAugmentedAndSorted(): void
+    {
+        // Declared deliberately out of alphabetical order and across two overloaded
+        // routes to prove merge + dedupe + augmentation (HEAD from GET, OPTIONS) + sort.
+        $this->router->routes = [
+            new MatchedRoute(
+                className: 'App\\Controller\\TestController',
+                method: 'create',
+                arguments: [],
+                path: '/items',
+                name: 'items_create',
+                methods: ['POST'],
+            ),
+            new MatchedRoute(
+                className: 'App\\Controller\\TestController',
+                method: 'read',
+                arguments: [],
+                path: '/items',
+                name: 'items_read',
+                methods: ['GET', 'DELETE'],
+            ),
+        ];
+
+        try {
+            $this->matchWithMethod('/items', 'PATCH');
+            static::fail('MethodNotAllowedException expected.');
+        } catch (\Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedExceptionInterface $e) {
+            static::assertSame(['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST'], $e->getAllowedMethods());
+            static::assertSame(405, $e->getCode());
+        }
+    }
+
+    public function testCompiledPatternsAreMemoisedOnTheResidentInstance(): void
+    {
+        $this->router->boot(container: $this->container);
+
+        // Before any match the compile-once cache is empty.
+        $cache = new \ReflectionProperty(Router::class, 'compiledPatterns');
+        static::assertSame([], $cache->getValue($this->router));
+
+        $this->matchWithMethod('/users', 'GET');
+
+        // After a match the route's compiled PCRE is cached for reuse across requests.
+        $compiled = $cache->getValue($this->router);
+        static::assertIsArray($compiled);
+        static::assertArrayHasKey('/users', $compiled);
+    }
+
+    private function matchWithMethod(string $path, string $method): ?MatchedRoute
+    {
+        $uri = $this->createStub(UriInterface::class);
+        $uri->method('getPath')->willReturn($path);
+        $request = $this->createStub(ServerRequestInterface::class);
+        $request->method('getUri')->willReturn($uri);
+        $request->method('getMethod')->willReturn($method);
+
+        return $this->router->matchRequest($request);
     }
 }

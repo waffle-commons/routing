@@ -89,9 +89,15 @@ final class Router implements RouterInterface
             if ($params !== false) {
                 $pathMatched = true;
 
-                // If the route accepts all methods (empty array), or if the method matches (case-insensitive)
+                // A route with no declared methods (empty array) accepts everything; the
+                // comparison is otherwise case-insensitive. Per RFC 7231 §4.3.2 a resource
+                // that serves GET also serves HEAD, so a HEAD request matches a GET route
+                // (the controller runs; stripping the body is the response emitter's concern).
                 $allowedMethods = array_map('strtoupper', $route->methods);
-                $methodMatches = $allowedMethods === [] || in_array($requestMethod, $allowedMethods, true);
+                $methodMatches =
+                    $allowedMethods === []
+                    || in_array($requestMethod, $allowedMethods, true)
+                    || $requestMethod === 'HEAD' && in_array('GET', $allowedMethods, true);
 
                 if ($methodMatches) {
                     // Exact match on path and HTTP method (first one wins)
@@ -108,22 +114,50 @@ final class Router implements RouterInterface
             return null;
         }
 
-        // Path matches but HTTP method does not: HTTP 405 Method Not Allowed
-        $allAllowedMethods = [];
-        foreach ($methodMismatchedRoutes as $route) {
-            foreach ($route->methods as $m) {
-                $allAllowedMethods[] = strtoupper($m);
-            }
-        }
-        $uniqueAllowedMethods = array_values(array_unique($allAllowedMethods));
+        // Path matches but HTTP method does not: HTTP 405 Method Not Allowed. The Allow
+        // list is merged across every path-matching candidate, augmented with the methods
+        // the framework auto-serves (HEAD, OPTIONS) and sorted, for a deterministic,
+        // RFC 7231-compliant response.
+        $allowedMethods = $this->buildAllowedMethods($methodMismatchedRoutes);
 
         $message = sprintf(
             'The requested HTTP method %s is not allowed for this route. Allowed methods: %s.',
             $rawMethod === '' ? 'GET' : $rawMethod,
-            implode(', ', $uniqueAllowedMethods),
+            implode(', ', $allowedMethods),
         );
 
-        throw new MethodNotAllowedException($uniqueAllowedMethods, $message);
+        throw new MethodNotAllowedException($allowedMethods, $message);
+    }
+
+    /**
+     * Builds the deterministic, RFC 7231-compliant set of HTTP methods allowed for a path,
+     * given the routes whose path matched the request. Methods are upper-cased and
+     * de-duplicated; HEAD is implied by GET (§4.3.2) and OPTIONS is always advertised
+     * because the pipeline auto-answers it. The list is sorted alphabetically so the
+     * response — and the `Allow` header derived from it — is stable across requests and
+     * trivial to assert against.
+     *
+     * @param list<MatchedRoute> $pathMatchedRoutes
+     * @return list<string>
+     */
+    private function buildAllowedMethods(array $pathMatchedRoutes): array
+    {
+        $methods = [];
+        foreach ($pathMatchedRoutes as $route) {
+            foreach ($route->methods as $method) {
+                $methods[] = strtoupper($method);
+            }
+        }
+
+        if (in_array('GET', $methods, true)) {
+            $methods[] = 'HEAD';
+        }
+        $methods[] = 'OPTIONS';
+
+        $methods = array_values(array_unique($methods));
+        sort($methods);
+
+        return $methods;
     }
 
     /**
@@ -136,7 +170,17 @@ final class Router implements RouterInterface
     private function match(ServerRequestInterface $req, MatchedRoute $route): array|false
     {
         $uriPath = $req->getUri()->getPath();
-        [$pattern, $names] = $this->compiledPatterns[$route->path] ?? $this->compilePattern($route->path);
+
+        // Compile-once memoisation: PCRE compilation is pure with respect to the route
+        // path, so the result is cached on the resident Router instance and reused across
+        // every request in FrankenPHP worker mode. The cache is bounded by the number of
+        // distinct route paths and holds no request-specific state, so it is worker-safe.
+        $compiled = $this->compiledPatterns[$route->path] ?? null;
+        if ($compiled === null) {
+            $compiled = $this->compilePattern($route->path);
+            $this->compiledPatterns[$route->path] = $compiled;
+        }
+        [$pattern, $names] = $compiled;
 
         $matches = [];
         if (preg_match($pattern, $uriPath, $matches) !== 1) {

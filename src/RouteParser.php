@@ -90,8 +90,10 @@ final readonly class RouteParser
         }
         // --- End Improved Path Concatenation ---
 
-        // Extract the allowed HTTP methods for this route
-        $methods = $route->methods;
+        // Extract and canonicalise the allowed HTTP methods for this route: upper-case
+        // once at discovery time (HTTP methods are case-insensitive tokens) and drop
+        // duplicates so the matching hot path and the Allow header operate on clean data.
+        $methods = array_values(array_unique(array_map('strtoupper', $route->methods)));
 
         // Validate duplicates, taking into account overloaded HTTP methods
         if ($this->isRouteRegistered($path, $methods, $routes)) {
