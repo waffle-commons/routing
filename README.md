@@ -9,16 +9,24 @@
 Waffle Routing Component
 ========================
 
-> **Release:** `v0.1.0-beta1`
+> **Release:** `v0.1.0-beta2` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
 
 Attribute-driven router. No YAML, no XML — routes live next to the controller code via the `#[Route]` attribute and are discovered by scanning the configured controller directory at boot time. The compiled route table is then cached.
 
-## 🆕 Beta-1 highlights
+## 🆕 Beta-2 highlights — HTTP method correctness
 
-- **Priority routing & catch-all.** `#[Route]` now takes an `int $priority = 0`. At boot the router sorts the compiled table by **descending** priority, so high-priority specific routes are tried before low-priority ones. Negative priorities (e.g. `-1000`) flag catch-all routes like `/{path:.*}` that should only match once every specific route has failed — the foundation for Strangler-Fig / API-gateway proxying.
-- **HTTP method filtering & overloading.** `#[Route(methods: ['GET', 'POST'])]` constrains a route to specific verbs, and several controllers can share one path across different methods. Matching is case-insensitive; a `GET` route also serves `HEAD` (RFC 7231 §4.3.2); `OPTIONS` is auto-answered (`204` + `Allow`) when the routing middleware has a PSR-17 response factory; and a method mismatch yields a `405` whose `Allow` header is merged across candidates, `HEAD`/`OPTIONS`-augmented, de-duplicated, and alphabetically sorted.
-- **`MatchedRoute` DTO.** `matchRequest()` now returns a typed `Waffle\Commons\Contracts\Routing\MatchedRoute` (or `null`) instead of a loose array.
-- **Reflection cleanup.** Discovery now reads `#[Route]` via native `ReflectionClass`/`ReflectionMethod::getAttributes()` — the old `ReflectionTrait` has been removed (Beta-1 Phase 1 architectural pass).
+- **HTTP method filtering & route overloading.** `#[Route(methods: ['GET', 'POST'])]` constrains a route to specific verbs. Multiple controller actions may share one path provided their methods arrays don't intersect — e.g. a `GET` and `POST` handler for `/articles`. Method names are canonicalised (upper-case) and de-duplicated at discovery, so typos like `methods: ['get']` are caught at boot, not at runtime.
+- **`HEAD ⇒ GET` fallback** (RFC 7231 §4.3.2). A request with method `HEAD` matches a `GET` route automatically.
+- **`OPTIONS` auto-answer.** When `Waffle\Commons\Pipeline\CoreRoutingMiddleware` is wired with a PSR-17 `ResponseFactoryInterface`, an `OPTIONS` request to a known path is answered with `204 No Content` + `Allow` header — no controller dispatch required.
+- **Deterministic `Allow` header.** When raising `MethodNotAllowedException` (HTTP `405`), the router merges declared methods, auto-augments with `HEAD` (if `GET` is allowed) and `OPTIONS`, deduplicates, and **alphabetically sorts** the resulting list — e.g. `Allow: GET, HEAD, OPTIONS, POST`. The error renderer (`waffle-commons/error-handler`) copies this verbatim.
+- **`#[Route]` attribute relocation.** The canonical attribute now lives at `Waffle\Commons\Contracts\Routing\Attribute\Route` (in the `contracts` package). The old `Waffle\Commons\Routing\Attribute\Route` has been removed — `use Waffle\Commons\Contracts\Routing\Attribute\Route;` everywhere.
+- **Worker-safe PCRE cache.** PCRE patterns compiled from route templates are memoised in resident-worker memory and survive across requests for the worker's lifetime.
+
+## Beta-1 inheritance
+
+- **Priority routing & catch-all.** `#[Route]` takes an `int $priority = 0`. At boot the router sorts the compiled table by **descending** priority, so high-priority specific routes are tried before low-priority ones. Negative priorities (e.g. `-1000`) flag catch-all routes like `/{path:.*}` that should only match once every specific route has failed — the foundation for Strangler-Fig / API-gateway proxying.
+- **`MatchedRoute` DTO.** `matchRequest()` returns a typed `Waffle\Commons\Contracts\Routing\MatchedRoute` (or `null`) instead of a loose array.
+- **Reflection cleanup.** Discovery reads `#[Route]` via native `ReflectionClass`/`ReflectionMethod::getAttributes()` — the old `ReflectionTrait` was removed in Beta-1.
 
 ## 📦 Installation
 
@@ -151,6 +159,22 @@ final class ArticleController
 - `final` classes throughout.
 - Strongly-typed `MatchedRoute` DTO return from `RouterInterface::matchRequest()` (no loose arrays).
 - Native reflection (`ReflectionClass` / `ReflectionMethod::getAttributes()`) to read `#[Route]` — the old `ReflectionTrait` was removed in Beta-1.
+
+## 🧭 Architectural boundary (`mago guard`)
+
+An active dependency **perimeter** is enforced on every CI run by `vendor/bin/mago guard` (bundled into `composer mago`; zero baselines). The rules live in [`mago.toml`](./mago.toml) under `[guard.perimeter]` — a forbidden `use` statement fails the build, not a reviewer.
+
+Production code under `Waffle\Commons\Routing` may depend **only** on:
+
+- `Waffle\Commons\Routing\**` — itself
+- `Waffle\Commons\Contracts\**` — the shared contracts package (where `#[Route]`, `MatchedRoute`, and `MethodNotAllowedException` now live)
+- `Waffle\Commons\Utils\**` — the `ClassParser` controller-discovery helper
+- `Psr\**` — PSR interfaces (PSR-7)
+- `@global` + `Psl\**` — PHP core and the PHP Standard Library
+
+Test code under `WaffleTests\Commons\Routing` is unrestricted (`@all`). Structural rules are guarded too: interfaces must be named `*Interface`, `Exception\**` classes must end in `*Exception`, and any `Enum\**` namespace may hold only `enum` declarations.
+
+Contract-first, component-agnostic by construction: components compose through `waffle-commons/contracts` (plus the explicitly-permitted `utils`), never ad-hoc through one another.
 
 ## 🧪 Testing
 
