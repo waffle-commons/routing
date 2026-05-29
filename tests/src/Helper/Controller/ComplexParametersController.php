@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace WaffleTests\Commons\Routing\Helper\Controller;
 
-use Waffle\Commons\Routing\Attribute\Route;
+use Waffle\Commons\Contracts\Routing\Attribute\Route;
 
 #[Route('/complex')]
 final class ComplexParametersController

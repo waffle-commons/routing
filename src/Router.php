@@ -7,6 +7,7 @@ namespace Waffle\Commons\Routing;
 use Psr\Http\Message\ServerRequestInterface;
 use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
+use Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedException;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
 
@@ -75,14 +76,88 @@ final class Router implements RouterInterface
     #[\Override]
     public function matchRequest(ServerRequestInterface $request): ?MatchedRoute
     {
+        // List of routes that match the path but not the requested HTTP method
+        /** @var list<MatchedRoute> $methodMismatchedRoutes */
+        $methodMismatchedRoutes = [];
+        $pathMatched = false;
+
+        $rawMethod = $request->getMethod();
+        $requestMethod = $rawMethod === '' ? 'GET' : strtoupper($rawMethod);
+
         foreach ($this->routes as $route) {
             $params = $this->match($request, $route);
             if ($params !== false) {
-                return $route->withParams($params);
+                $pathMatched = true;
+
+                // A route with no declared methods (empty array) accepts everything; the
+                // comparison is otherwise case-insensitive. Per RFC 7231 §4.3.2 a resource
+                // that serves GET also serves HEAD, so a HEAD request matches a GET route
+                // (the controller runs; stripping the body is the response emitter's concern).
+                $allowedMethods = array_map('strtoupper', $route->methods);
+                $methodMatches =
+                    $allowedMethods === []
+                    || in_array($requestMethod, $allowedMethods, true)
+                    || $requestMethod === 'HEAD' && in_array('GET', $allowedMethods, true);
+
+                if ($methodMatches) {
+                    // Exact match on path and HTTP method (first one wins)
+                    return $route->withParams($params);
+                }
+
+                // Path matches but method does not, keep track to throw 405 if needed
+                $methodMismatchedRoutes[] = $route;
             }
         }
 
-        return null;
+        if (!$pathMatched) {
+            // No path matches: return null as per RouterInterface contract
+            return null;
+        }
+
+        // Path matches but HTTP method does not: HTTP 405 Method Not Allowed. The Allow
+        // list is merged across every path-matching candidate, augmented with the methods
+        // the framework auto-serves (HEAD, OPTIONS) and sorted, for a deterministic,
+        // RFC 7231-compliant response.
+        $allowedMethods = $this->buildAllowedMethods($methodMismatchedRoutes);
+
+        $message = sprintf(
+            'The requested HTTP method %s is not allowed for this route. Allowed methods: %s.',
+            $rawMethod === '' ? 'GET' : $rawMethod,
+            implode(', ', $allowedMethods),
+        );
+
+        throw new MethodNotAllowedException($allowedMethods, $message);
+    }
+
+    /**
+     * Builds the deterministic, RFC 7231-compliant set of HTTP methods allowed for a path,
+     * given the routes whose path matched the request. Methods are upper-cased and
+     * de-duplicated; HEAD is implied by GET (§4.3.2) and OPTIONS is always advertised
+     * because the pipeline auto-answers it. The list is sorted alphabetically so the
+     * response — and the `Allow` header derived from it — is stable across requests and
+     * trivial to assert against.
+     *
+     * @param list<MatchedRoute> $pathMatchedRoutes
+     * @return list<string>
+     */
+    private function buildAllowedMethods(array $pathMatchedRoutes): array
+    {
+        $methods = [];
+        foreach ($pathMatchedRoutes as $route) {
+            foreach ($route->methods as $method) {
+                $methods[] = strtoupper($method);
+            }
+        }
+
+        if (in_array('GET', $methods, true)) {
+            $methods[] = 'HEAD';
+        }
+        $methods[] = 'OPTIONS';
+
+        $methods = array_values(array_unique($methods));
+        sort($methods);
+
+        return $methods;
     }
 
     /**
@@ -95,7 +170,17 @@ final class Router implements RouterInterface
     private function match(ServerRequestInterface $req, MatchedRoute $route): array|false
     {
         $uriPath = $req->getUri()->getPath();
-        [$pattern, $names] = $this->compiledPatterns[$route->path] ?? $this->compilePattern($route->path);
+
+        // Compile-once memoisation: PCRE compilation is pure with respect to the route
+        // path, so the result is cached on the resident Router instance and reused across
+        // every request in FrankenPHP worker mode. The cache is bounded by the number of
+        // distinct route paths and holds no request-specific state, so it is worker-safe.
+        $compiled = $this->compiledPatterns[$route->path] ?? null;
+        if ($compiled === null) {
+            $compiled = $this->compilePattern($route->path);
+            $this->compiledPatterns[$route->path] = $compiled;
+        }
+        [$pattern, $names] = $compiled;
 
         $matches = [];
         if (preg_match($pattern, $uriPath, $matches) !== 1) {
