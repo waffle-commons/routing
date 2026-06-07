@@ -391,7 +391,7 @@ final class RouterTest extends TestCase
             }
 
             #[\Override]
-            public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
+            public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
             {
                 $this->store[$key] = $value;
                 return true;
@@ -422,7 +422,7 @@ final class RouterTest extends TestCase
             }
 
             #[\Override]
-            public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
+            public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
             {
                 foreach ($values as $k => $v) {
                     $this->store[(string) $k] = $v;
