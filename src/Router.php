@@ -10,6 +10,9 @@ use Waffle\Commons\Contracts\Container\ContainerInterface;
 use Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedException;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
 use Waffle\Commons\Contracts\Routing\RouterInterface;
+use Waffle\Commons\Contracts\Telemetry\Enum\SpanKind;
+use Waffle\Commons\Contracts\Telemetry\NullTracer;
+use Waffle\Commons\Contracts\Telemetry\TracerInterface;
 
 final class Router implements RouterInterface
 {
@@ -41,6 +44,7 @@ final class Router implements RouterInterface
     public function __construct(
         string|false $directory,
         private readonly ?CacheInterface $cache = null,
+        private readonly TracerInterface $tracer = new NullTracer(),
     ) {
         $this->routes = [];
         $this->files = false;
@@ -75,6 +79,28 @@ final class Router implements RouterInterface
 
     #[\Override]
     public function matchRequest(ServerRequestInterface $request): ?MatchedRoute
+    {
+        $span = $this->tracer->startSpan('waffle.routing', SpanKind::Internal);
+        $span->setAttribute('http.request.method', $request->getMethod());
+
+        try {
+            $route = $this->resolve($request);
+            if ($route !== null) {
+                $span->setAttribute('http.route', $route->path);
+            }
+
+            return $route;
+        } finally {
+            $span->end();
+        }
+    }
+
+    /**
+     * Resolve the matching route (or null), raising a 405 when only the HTTP method mismatches.
+     *
+     * @throws MethodNotAllowedException
+     */
+    private function resolve(ServerRequestInterface $request): ?MatchedRoute
     {
         // List of routes that match the path but not the requested HTTP method
         /** @var list<MatchedRoute> $methodMismatchedRoutes */
