@@ -13,10 +13,13 @@ use Waffle\Commons\Contracts\Routing\RouterInterface;
 use Waffle\Commons\Contracts\Telemetry\Enum\SpanKind;
 use Waffle\Commons\Contracts\Telemetry\NullTracer;
 use Waffle\Commons\Contracts\Telemetry\TracerInterface;
+use Waffle\Commons\Routing\Trie\RouteTrie;
 
 final class Router implements RouterInterface
 {
     private const string CACHE_KEY = 'waffle.routes.discovered';
+
+    private const string TRIE_CACHE_KEY = 'waffle.routes.trie';
 
     private(set) string|false $directory {
         set => $this->directory = $value;
@@ -38,6 +41,16 @@ final class Router implements RouterInterface
 
     private readonly RouteDiscoverer $discoverer;
 
+    /**
+     * Prebuilt static lookup tree (AOT-02). Built once at {@see self::boot()} (or
+     * loaded from cache) and frozen for the worker lifetime: lookups walk it in
+     * O(depth) instead of the sequential `foreach`. Null when routes are seeded
+     * directly (e.g. via the public `routes` setter in tests) without a boot
+     * pass, in which case {@see self::resolve()} transparently falls back to the
+     * sequential matcher — behaviour is identical either way.
+     */
+    private ?RouteTrie $trie = null;
+
     /** @var array<string, array{0: non-empty-string, 1: list<string>}> Compiled PCRE keyed by route path (compile-once cache). */
     private array $compiledPatterns = [];
 
@@ -56,11 +69,22 @@ final class Router implements RouterInterface
     public function boot(ContainerInterface $container): static
     {
         if ($this->cache !== null) {
+            // AOT-02: prefer the prebuilt trie artifact when one was cached at
+            // build time — it rehydrates without re-walking the route list.
+            $cachedTrie = $this->cache->get(self::TRIE_CACHE_KEY);
+            if (is_array($cachedTrie)) {
+                /** @var array<string, mixed> $cachedTrie */
+                $this->trie = RouteTrie::fromArray($cachedTrie);
+            }
+
             $cachedRoutes = $this->cache->get(self::CACHE_KEY);
             if (is_array($cachedRoutes) && $this->isMatchedRouteList($cachedRoutes)) {
                 // The cached payload is already sorted by priority at write time —
                 // hydrate it verbatim instead of paying for a redundant sort.
                 $this->routes = $cachedRoutes;
+                // No prebuilt trie artifact (routes cached by an older build): build
+                // it from the hydrated list so matching stays O(depth).
+                $this->trie ??= RouteTrie::build($this->routes);
 
                 return $this;
             }
@@ -73,6 +97,10 @@ final class Router implements RouterInterface
         usort($discovered, static fn(MatchedRoute $a, MatchedRoute $b): int => $b->priority <=> $a->priority);
         $this->routes = $discovered;
         $this->cache?->set(self::CACHE_KEY, $this->routes);
+
+        // Build the static lookup tree from the freshly-sorted route list (unless
+        // a prebuilt artifact was already loaded above).
+        $this->trie ??= RouteTrie::build($this->routes);
 
         return $this;
     }
@@ -102,6 +130,14 @@ final class Router implements RouterInterface
      */
     private function resolve(ServerRequestInterface $request): ?MatchedRoute
     {
+        // AOT-02 fast path: when a static lookup tree is present, resolve in
+        // O(depth) instead of the sequential scan below. The trie reproduces the
+        // exact 405 / HEAD / OPTIONS semantics of the loop, so the two paths are
+        // observably equivalent.
+        if ($this->trie !== null) {
+            return $this->trie->match($request->getMethod(), $request->getUri()->getPath());
+        }
+
         // List of routes that match the path but not the requested HTTP method
         /** @var list<MatchedRoute> $methodMismatchedRoutes */
         $methodMismatchedRoutes = [];
