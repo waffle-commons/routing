@@ -5,6 +5,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Released in lockstep with the Waffle Commons umbrella tag.
 
+## [0.1.0-beta5] — 2026-06-26
+
+**Theme: AOT route preheat & tracing.**
+
+### Added
+- **AOT route preheat — `RouteTrie` (AOT-02 / RFC-019).** New `Waffle\Commons\Routing\Trie\RouteTrie` and `TrieNode` index the discovered route list into a segment-keyed lookup tree, so `Router::matchRequest()` resolves in **O(depth)** instead of the sequential `foreach` + per-route PCRE scan. The fast path is reflection-free and behaves identically to the legacy matcher: static / dynamic (`{id}` / `{id:\d+}`) / catch-all (`{path:.*}`) segments, priority parity (candidates from every branch are sorted by their build-time priority index, not a hardcoded static-beats-dynamic rule), and verbatim `405` / `HEAD ⇒ GET` / `OPTIONS` semantics.
+- **Root catch-all parity (AOT-03).** A root-mounted catch-all (`/{path:.*}`) is now evaluated at every node — including when the path is exhausted — so it matches the root path `/` exactly as the sequential PCRE matcher did.
+- **Trie cache artifact.** `Router::boot()` prefers a prebuilt trie cached under `waffle.routes.trie` (rehydrated via `RouteTrie::fromArray()` without re-walking the route list); when absent it builds the trie from the hydrated/discovered route list. `RouteTrie::toArray()` / `fromArray()` flatten and rehydrate the tree as a plain nested array for the AOT build step to cache. The trie is frozen for the worker lifetime (built once, never mutated).
+- **Telemetry spans on route resolution (OBS-01).** `Router` accepts an optional `Waffle\Commons\Contracts\Telemetry\TracerInterface` (defaulting to `NullTracer`). `matchRequest()` opens an internal `waffle.routing` span carrying the `http.request.method` attribute and, on a hit, `http.route`. Route resolution moved into a private `resolve()` so the span wraps the full match — zero overhead when no tracer is wired.
+
+### Changed
+- **Cyclomatic-complexity gate enabled.** `mago.toml` now enforces `cyclomatic-complexity` at `threshold = 50` (previously disabled).
+
+### Dependencies
+- Lockstep version bump with the Beta-5 wave; `composer.lock` refreshed alongside the umbrella tag.
+
 ## [0.1.0-beta4] — 2026-06-13
 
 ### Changed
