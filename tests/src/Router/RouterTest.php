@@ -641,7 +641,19 @@ final class RouterTest extends TestCase
 
     public function testCompiledPatternsAreMemoisedOnTheResidentInstance(): void
     {
-        $this->router->boot(container: $this->container);
+        // The compile-once PCRE cache is a property of the sequential fallback
+        // matcher (AOT-02: when a trie is present, matching bypasses it entirely).
+        // Seed the routes directly so no trie is built, exercising the loop.
+        $this->router->routes = [
+            new MatchedRoute(
+                className: 'App\\Controller\\TestController',
+                method: 'list',
+                arguments: [],
+                path: '/users',
+                name: 'users_list',
+                methods: ['GET'],
+            ),
+        ];
 
         // Before any match the compile-once cache is empty.
         $cache = new \ReflectionProperty(Router::class, 'compiledPatterns');

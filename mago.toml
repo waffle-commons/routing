@@ -86,7 +86,7 @@ block-statement = { enabled = false }
 assertion-style = { enabled = false }
 assert-description = { enabled = false }
 tagged-todo = { enabled = false }
-cyclomatic-complexity = { enabled = false }
+cyclomatic-complexity = { enabled = true, threshold = 50 }
 too-many-methods = { enabled = false }
 kan-defect = { enabled = false }
 halstead = { enabled = false }
