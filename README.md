@@ -183,6 +183,14 @@ Contract-first, component-agnostic by construction: components compose through `
 docker exec -w /waffle-commons/routing waffle-dev composer tests
 ```
 
+## 📚 Documentation
+
+Full guides live in the central Diátaxis documentation tree:
+
+- [Reference — `waffle-commons/routing`](https://github.com/waffle-commons/documentation/blob/main/reference/routing.md)
+- [Explanation — AOT compilation](https://github.com/waffle-commons/documentation/blob/main/explanation/aot-compilation.md)
+- [Documentation home](https://github.com/waffle-commons/documentation)
+
 ## 📄 License
 
 MIT — see [LICENSE.md](./LICENSE.md).
