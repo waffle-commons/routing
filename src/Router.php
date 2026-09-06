@@ -117,6 +117,18 @@ final class Router implements RouterInterface
         return $this;
     }
 
+    /**
+     * **Worker safety.** `$span` is a *per-request value*, not a resident service:
+     * {@see TracerInterface::startSpan()} mints a fresh span for every call and it
+     * is ended in the `finally` below, so annotating it leaks nothing across
+     * requests. The audit reads `$span` as a local handle on the injected tracer
+     * and reports the `setAttribute()` calls as state mutation; the
+     * {@see WorkerSafe} marker records that they are request-scoped by design.
+     */
+    #[WorkerSafe(
+        scope: 'per-request',
+        reason: 'transient span minted fresh per matchRequest() call; ended in the finally, never resident state',
+    )]
     #[\Override]
     public function matchRequest(ServerRequestInterface $request): ?MatchedRoute
     {
