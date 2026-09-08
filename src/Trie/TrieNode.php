@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Routing\Trie;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
 
 /**
@@ -27,24 +28,52 @@ use Waffle\Commons\Contracts\Routing\MatchedRoute;
 final class TrieNode
 {
     /** @var array<string, TrieNode> Static segment children, keyed by literal segment. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public array $static = [];
 
     /** Parameter name of the single dynamic ({param}) child, if any. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public ?string $dynamicName = null;
 
     /** Optional PCRE constraint a dynamic-segment value must satisfy. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public ?string $dynamicConstraint = null;
 
     /** The dynamic child node, if any. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public ?TrieNode $dynamicChild = null;
 
     /** Parameter name of the catch-all wildcard leaf, if any. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public ?string $catchAllName = null;
 
     /** @var list<array{order: int, route: MatchedRoute}> Routes terminating at the catch-all leaf, tagged with build-time order. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public array $catchAllRoutes = [];
 
     /** @var list<array{order: int, route: MatchedRoute}> Routes terminating at this node, tagged with build-time order. */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'mutable only during RouteTrie::build(); a built trie is never written to again and is safe to hold for the worker lifetime',
+    )]
     public array $routes = [];
 
     /**

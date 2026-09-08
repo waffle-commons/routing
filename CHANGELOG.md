@@ -5,6 +5,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Released in lockstep with the Waffle Commons umbrella tag.
 
+## [0.1.0-beta6] — 2026-09
+
+**Theme: worker-safety audit coverage.**
+
+### Changed
+- **Worker-safety audit coverage.** This component was never audited by `wfl igor`: it had no `igor-php/igor-php` in `require-dev`, so the ecosystem runner silently skipped it for four releases. It now ships `igor.json`, the `composer igor` script, and the dev dependency, and is part of the 0-KO gate.
+- **Worker-safety annotations.** With the audit now running, `Router::$routes` / `$trie` (built once in `boot()` and frozen for the worker lifetime), `Router::$compiledPatterns` (a compile-once PCRE memo, bounded by the frozen route list) and `TrieNode`'s build-time fields are declared `#[WorkerSafe]` with explicit reasons — documenting intent that was previously only prose. `Router::matchRequest()` carries a method-level `#[WorkerSafe(scope: 'per-request')]` for the same reason: the audit reads the per-call `waffle.routing` span as a local handle on the injected tracer, but the span is minted fresh per call and ended in the method's own `finally`, so its attributes are request-scoped by design.
+
+### Documentation
+- The README now links into the central Diátaxis documentation tree (DOC-02).
+
 ## [0.1.0-beta5] — 2026-07-08
 
 **Theme: AOT route preheat & tracing.**

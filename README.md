@@ -10,7 +10,7 @@
 Waffle Routing Component
 ========================
 
-> **Release:** `0.1.0-beta5` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
+> **Release:** `0.1.0-beta6` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
 
 Attribute-driven router. No YAML, no XML — routes live next to the controller code via the `#[Route]` attribute and are discovered by scanning the configured controller directory at boot time. The compiled route table is then cached.
 
@@ -182,6 +182,14 @@ Contract-first, component-agnostic by construction: components compose through `
 ```bash
 docker exec -w /waffle-commons/routing waffle-dev composer tests
 ```
+
+## 📚 Documentation
+
+Full guides live in the central Diátaxis documentation tree:
+
+- [Reference — `waffle-commons/routing`](https://github.com/waffle-commons/documentation/blob/main/reference/routing.md)
+- [Explanation — AOT compilation](https://github.com/waffle-commons/documentation/blob/main/explanation/aot-compilation.md)
+- [Documentation home](https://github.com/waffle-commons/documentation)
 
 ## 📄 License
 

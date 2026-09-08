@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Routing;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Waffle\Commons\Contracts\Cache\CacheInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
@@ -35,6 +36,10 @@ final class Router implements RouterInterface
     /**
      * @var list<MatchedRoute>
      */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'boot-time trie/route assembly; built once in boot() (or rehydrated from cache) and frozen for the worker lifetime',
+    )]
     public array $routes {
         set => $this->routes = $value;
     }
@@ -49,9 +54,16 @@ final class Router implements RouterInterface
      * pass, in which case {@see self::resolve()} transparently falls back to the
      * sequential matcher — behaviour is identical either way.
      */
+    #[WorkerSafe(
+        scope: 'boot-time',
+        reason: 'boot-time trie/route assembly; built once in boot() (or rehydrated from cache) and frozen for the worker lifetime',
+    )]
     private ?RouteTrie $trie = null;
 
     /** @var array<string, array{0: non-empty-string, 1: list<string>}> Compiled PCRE keyed by route path (compile-once cache). */
+    #[WorkerSafe(
+        reason: 'compile-once PCRE memo keyed by route path; bounded by the frozen route list, derived data only, identical for every request',
+    )]
     private array $compiledPatterns = [];
 
     public function __construct(
@@ -105,6 +117,18 @@ final class Router implements RouterInterface
         return $this;
     }
 
+    /**
+     * **Worker safety.** `$span` is a *per-request value*, not a resident service:
+     * {@see TracerInterface::startSpan()} mints a fresh span for every call and it
+     * is ended in the `finally` below, so annotating it leaks nothing across
+     * requests. The audit reads `$span` as a local handle on the injected tracer
+     * and reports the `setAttribute()` calls as state mutation; the
+     * {@see WorkerSafe} marker records that they are request-scoped by design.
+     */
+    #[WorkerSafe(
+        scope: 'per-request',
+        reason: 'transient span minted fresh per matchRequest() call; ended in the finally, never resident state',
+    )]
     #[\Override]
     public function matchRequest(ServerRequestInterface $request): ?MatchedRoute
     {
