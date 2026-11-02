@@ -124,12 +124,12 @@ final readonly class RouteParser
     {
         $params = [];
         foreach ($method->getParameters() as $param) {
-            if (!$param->getType() instanceof ReflectionNamedType) {
+            $paramType = $param->getType();
+            if (!$paramType instanceof ReflectionNamedType) {
                 continue;
             }
 
-            $paramType = $param->getType();
-            $params[$param->getName()] = $paramType?->getName();
+            $params[$param->getName()] = $paramType->getName();
         }
         return $params;
     }
