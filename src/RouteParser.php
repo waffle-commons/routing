@@ -118,7 +118,7 @@ final readonly class RouteParser
     }
 
     /**
-     * @return array<string, mixed|string|null>
+     * @return array<string, string>
      */
     private function extractParameters(ReflectionMethod $method): array
     {
