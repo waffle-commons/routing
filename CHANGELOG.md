@@ -7,8 +7,11 @@ Released in lockstep with the Waffle Commons umbrella tag.
 
 ## [0.1.0-beta7] — 2026-11
 
+### Fixed
+- `Router::boot()` treats an unreachable cache backend as a cache miss (RFC-013 §4). It catches `CacheBackendUnavailableExceptionInterface` on the route-cache reads and write, drops anything read before the failure, and discovers the routes instead. Before, a worker that booted or recycled while Redis was down died on an uncaught `CacheBackendUnavailableException`, so `/healthz` failed with it. Now `/healthz` stays up and `/readyz` reports the outage.
+
 ### Changed
-- Lockstep version bump with the Beta-7 wave. No behavioural changes in this component since `0.1.0-beta6`. Development only: the toolchain moved to mago 1.59, psalm 6.20 and igor-php 0.10.1, and `phpunit.xml` now validates against the installed PHPUnit schema.
+- Lockstep version bump with the Beta-7 wave. Development only: the toolchain moved to mago 1.59, psalm 6.20 and igor-php 0.10.1, and `phpunit.xml` now validates against the installed PHPUnit schema.
 
 ## [0.1.0-beta6] — 2026-09
 
