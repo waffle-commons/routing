@@ -42,7 +42,7 @@ abstract class AbstractTestCase extends BaseTestCase
 
         foreach ($files as $fileinfo) {
             $action = $fileinfo->isDir() && !$fileinfo->isLink() ? 'rmdir' : 'unlink';
-            $action($fileinfo->getRealPath());
+            $action($fileinfo->getPathname());
         }
         unset($files);
 

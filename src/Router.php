@@ -7,6 +7,7 @@ namespace Waffle\Commons\Routing;
 use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Waffle\Commons\Contracts\Cache\CacheInterface;
+use Waffle\Commons\Contracts\Cache\Exception\CacheBackendUnavailableExceptionInterface;
 use Waffle\Commons\Contracts\Container\ContainerInterface;
 use Waffle\Commons\Contracts\Routing\Exception\MethodNotAllowedException;
 use Waffle\Commons\Contracts\Routing\MatchedRoute;
@@ -77,28 +78,40 @@ final class Router implements RouterInterface
         $this->discoverer = new RouteDiscoverer(directory: $directory);
     }
 
+    /**
+     * Builds the route table once per worker: from the cache when it holds one (AOT-02),
+     * otherwise by discovery. An unreachable cache backend is a miss, never a failed boot
+     * (RFC-013 §4): a worker that starts or recycles while Redis is down discovers its
+     * routes and keeps serving.
+     */
     #[\Override]
     public function boot(ContainerInterface $container): static
     {
         if ($this->cache !== null) {
-            // AOT-02: prefer the prebuilt trie artifact when one was cached at
-            // build time — it rehydrates without re-walking the route list.
-            $cachedTrie = $this->cache->get(self::TRIE_CACHE_KEY);
-            if (is_array($cachedTrie)) {
-                /** @var array<string, mixed> $cachedTrie */
-                $this->trie = RouteTrie::fromArray($cachedTrie);
-            }
+            try {
+                // AOT-02: prefer the prebuilt trie artifact when one was cached at
+                // build time — it rehydrates without re-walking the route list.
+                $cachedTrie = $this->cache->get(self::TRIE_CACHE_KEY);
+                if (is_array($cachedTrie)) {
+                    /** @var array<string, mixed> $cachedTrie */
+                    $this->trie = RouteTrie::fromArray($cachedTrie);
+                }
 
-            $cachedRoutes = $this->cache->get(self::CACHE_KEY);
-            if (is_array($cachedRoutes) && $this->isMatchedRouteList($cachedRoutes)) {
-                // The cached payload is already sorted by priority at write time —
-                // hydrate it verbatim instead of paying for a redundant sort.
-                $this->routes = $cachedRoutes;
-                // No prebuilt trie artifact (routes cached by an older build): build
-                // it from the hydrated list so matching stays O(depth).
-                $this->trie ??= RouteTrie::build($this->routes);
+                $cachedRoutes = $this->cache->get(self::CACHE_KEY);
+                if (is_array($cachedRoutes) && $this->isMatchedRouteList($cachedRoutes)) {
+                    // The cached payload is already sorted by priority at write time —
+                    // hydrate it verbatim instead of paying for a redundant sort.
+                    $this->routes = $cachedRoutes;
+                    // No prebuilt trie artifact (routes cached by an older build): build
+                    // it from the hydrated list so matching stays O(depth).
+                    $this->trie ??= RouteTrie::build($this->routes);
 
-                return $this;
+                    return $this;
+                }
+            } catch (CacheBackendUnavailableExceptionInterface) {
+                // The backend is down, or went away between the two reads: drop any
+                // half-read artifact so the trie is rebuilt from the discovered routes.
+                $this->trie = null;
             }
         }
 
@@ -108,13 +121,26 @@ final class Router implements RouterInterface
         // declaration order within a single priority bucket.
         usort($discovered, static fn(MatchedRoute $a, MatchedRoute $b): int => $b->priority <=> $a->priority);
         $this->routes = $discovered;
-        $this->cache?->set(self::CACHE_KEY, $this->routes);
+        $this->storeRoutes();
 
         // Build the static lookup tree from the freshly-sorted route list (unless
         // a prebuilt artifact was already loaded above).
         $this->trie ??= RouteTrie::build($this->routes);
 
         return $this;
+    }
+
+    /**
+     * Writes the discovered table for the next worker that boots. A backend that is
+     * down only costs that worker a discovery pass, so the failure stops here.
+     */
+    private function storeRoutes(): void
+    {
+        try {
+            $this->cache?->set(self::CACHE_KEY, $this->routes);
+        } catch (CacheBackendUnavailableExceptionInterface) {
+            return;
+        }
     }
 
     /**

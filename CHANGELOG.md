@@ -5,6 +5,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Released in lockstep with the Waffle Commons umbrella tag.
 
+## [0.1.0-beta7] — 2026-11
+
+### Fixed
+- `Router::boot()` treats an unreachable cache backend as a cache miss (RFC-013 §4). It catches `CacheBackendUnavailableExceptionInterface` on the route-cache reads and write, drops anything read before the failure, and discovers the routes instead. Before, a worker that booted or recycled while Redis was down died on an uncaught `CacheBackendUnavailableException`, so `/healthz` failed with it. Now `/healthz` stays up and `/readyz` reports the outage.
+
+### Changed
+- Lockstep version bump with the Beta-7 wave. Development only: the toolchain moved to mago 1.59, psalm 6.20 and igor-php 0.10.1, and `phpunit.xml` now validates against the installed PHPUnit schema.
+
 ## [0.1.0-beta6] — 2026-09
 
 **Theme: worker-safety audit coverage.**
